@@ -65,7 +65,7 @@ const Footer = () => {
 
           <div className="space-y-4">
             <h4 className="font-semibold text-white mb-4 text-lg">Connect</h4>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 justify-center md:justify-start">
               {["f", "t", "in"].map((icon) => (
                 <a
                   key={icon}
@@ -79,13 +79,13 @@ const Footer = () => {
               ))}
             </div>
             <p className="text-sm mt-6">Subscribe to our newsletter</p>
-            <div className="flex mt-2">
+            <div className="flex mt-2 flex-col sm:flex-row">
               <input
                 type="email"
                 placeholder="Your email"
-                className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-l-xl text-sm flex-1 focus:outline-none focus:border-slate-500 transition-all duration-300"
+                className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-t-xl sm:rounded-l-xl sm:rounded-t-none text-sm flex-1 focus:outline-none focus:border-slate-500 transition-all duration-300"
               />
-              <button className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-r-xl font-medium transition-all duration-300 hover:shadow-lg hover:shadow-slate-400/20">
+              <button className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-b-xl sm:rounded-r-xl sm:rounded-b-none font-medium transition-all duration-300 hover:shadow-lg hover:shadow-slate-400/20">
                 Subscribe
               </button>
             </div>
@@ -144,13 +144,13 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-10">
+          <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
             {["how-it-works", "features", "impact", "testimonials"].map(
               (id, index) => (
                 <button
                   key={id}
                   onClick={() => scrollToSection(id)}
-                  className="text-slate-600 hover:text-slate-800 transition-all duration-300 group relative font-medium"
+                  className="text-slate-600 hover:text-slate-800 transition-all duration-300 group relative font-medium text-base lg:text-lg"
                 >
                   {id
                     .split("-")
@@ -163,10 +163,10 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="px-6 py-3 text-slate-600 hover:text-slate-800 transition-all duration-300 font-medium hover:scale-105">
+            <button className="px-4 py-2 sm:px-6 sm:py-3 text-slate-600 hover:text-slate-800 transition-all duration-300 font-medium hover:scale-105 text-base lg:text-lg">
               Login
             </button>
-            <button className="group px-8 py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-500 transform hover:scale-105 shadow-md hover:shadow-xl hover:shadow-slate-500/30 font-medium flex items-center space-x-2">
+            <button className="group px-4 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-500 transform hover:scale-105 shadow-md hover:shadow-xl hover:shadow-slate-500/30 font-medium flex items-center space-x-2 text-base lg:text-lg">
               <span>Sign Up</span>
               <svg
                 className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
@@ -267,9 +267,9 @@ const HeroSection = () => {
 
       {/* SVG network visualization */}
       <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <div className="w-1/2 h-1/2 opacity-20 animate-pulse-slow">
+        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl opacity-20 animate-pulse-slow">
           <svg
-            className="w-full h-full"
+            className="w-full h-auto"
             viewBox="0 0 100 100"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -336,7 +336,7 @@ const HeroSection = () => {
           }`}
         >
           <h1
-            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight tracking-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight tracking-tight"
             style={{ textShadow: "0 0 15px rgba(71, 85, 105, 0.3)" }}
           >
             Revolutionize Medicine Donations
@@ -344,23 +344,23 @@ const HeroSection = () => {
               with Secure Trust
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Connect donors, hospitals, and patients in a secure, transparent
             network. Save lives, reduce waste, maximize impact.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-8 py-4 text-lg font-bold text-white transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(71,85,105,0.5)] hover:scale-105 hover:from-slate-700 hover:to-slate-800">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
+            <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(71,85,105,0.5)] hover:scale-105 hover:from-slate-700 hover:to-slate-800">
               <span className="absolute h-0 w-0 rounded-full bg-white opacity-10 transition-all duration-300 ease-out group-hover:h-32 group-hover:w-32"></span>
               <span className="relative">Donate Now</span>
             </button>
-            <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl border-2 border-slate-600 bg-transparent px-8 py-4 text-lg font-bold text-slate-600 transition-all duration-500 ease-in-out hover:bg-slate-600 hover:text-white hover:shadow-[0_0_20px_rgba(71,85,105,0.3)] hover:scale-105">
+            <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl border-2 border-slate-600 bg-transparent px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-slate-600 transition-all duration-500 ease-in-out hover:bg-slate-600 hover:text-white hover:shadow-[0_0_20px_rgba(71,85,105,0.3)] hover:scale-105">
               <span className="relative">Request Help</span>
             </button>
           </div>
         </div>
 
         {/* Stats section */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {[
             { value: "1,234", label: "Medicines Donated Today" },
             { value: "567", label: "Lives Impacted" },
@@ -368,15 +368,17 @@ const HeroSection = () => {
           ].map((stat, index) => (
             <div
               key={index}
-              className={`bg-slate-100/80 backdrop-blur-sm rounded-xl p-6 border border-slate-200/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-500 ease-out ${
+              className={`bg-slate-100/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-200/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-500 ease-out ${
                 isVisible
                   ? "opacity-100 translate-y-0"
                   : "opacity-0 translate-y-10"
               }`}
               style={{ transitionDelay: `${index * 200}ms` }}
             >
-              <p className="text-4xl font-bold text-slate-700">{stat.value}</p>
-              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mt-2">
+              <p className="text-3xl sm:text-4xl font-bold text-slate-700">
+                {stat.value}
+              </p>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 uppercase tracking-wider mt-2">
                 {stat.label}
               </p>
             </div>
@@ -535,46 +537,49 @@ const HowItWorksSection = () => {
       <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxIiBmaWxsPSIjOTRhM2I4Ii8+PC9zdmc+')] pointer-events-none"></div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-slate-900 mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
             How MediTrust Works
           </h2>
           <div className="w-32 h-1 bg-gradient-to-r from-slate-600 to-slate-500 rounded-full mx-auto mb-6 animate-pulse"></div>
-          <p className="text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl sm:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
             Our intuitive process combines advanced technology with
             human-centered design for seamless donations
           </p>
         </div>
 
-        <div className="relative">
-          {/* Timeline line */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-slate-200">
+        <div className="relative flex flex-col lg:block">
+          {/* Timeline line - vertical on mobile, horizontal on desktop */}
+          <div className="absolute left-0 lg:left-1/2 transform lg:-translate-x-1/2 w-full lg:w-1 h-1 lg:h-full bg-slate-200 flex lg:block flex-col">
             <div
-              className="w-full bg-gradient-to-b from-slate-600 to-slate-500 transition-all duration-500"
-              style={{ height: `${((activeStep + 1) / steps.length) * 100}%` }}
+              className="h-full lg:w-full bg-gradient-to-r lg:bg-gradient-to-b from-slate-600 to-slate-500 transition-all duration-500"
+              style={{
+                width: `${((activeStep + 1) / steps.length) * 100}%`,
+                height: "100%",
+              }}
             ></div>
           </div>
 
           {steps.map((step, index) => (
             <div
               key={index}
-              className={`relative mb-16 group cursor-pointer transition-all duration-500 ease-out ${
+              className={`relative mb-16 group cursor-pointer transition-all duration-500 ease-out flex flex-col items-center lg:items-start lg:text-left lg:mb-0 lg:pr-0 lg:pl-0 ${
                 activeStep === index ? "scale-105" : "hover:scale-102"
               } ${
                 index % 2 === 0
-                  ? "pr-[calc(50%+2rem)] text-right"
-                  : "pl-[calc(50%+2rem)] text-left"
+                  ? "lg:pr-[calc(50%+2rem)] lg:text-right"
+                  : "lg:pl-[calc(50%+2rem)] lg:text-left"
               }`}
               onMouseEnter={() => setActiveStep(index)}
             >
-              <div className="absolute left-1/2 top-10 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-slate-600 shadow-lg group-hover:scale-125 transition-all duration-300 z-20">
+              <div className="absolute top-0 lg:top-10 left-1/2 lg:left-1/2 transform -translate-x-1/2 lg:-translate-y-1/2 bg-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-slate-600 shadow-lg group-hover:scale-125 transition-all duration-300 z-20">
                 <span className="text-slate-600 font-bold">{step.number}</span>
               </div>
 
-              <div className="relative bg-white rounded-3xl p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-slate-300 transition-all duration-500 ease-out overflow-hidden group-hover:rotate-1 z-10">
+              <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-slate-300 transition-all duration-500 ease-out z-10 overflow-hidden w-full max-w-md lg:max-w-none">
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-50/0 to-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="flex flex-col space-y-4 relative z-10">
+                <div className="flex flex-col space-y-4 relative z-10 items-center lg:items-start text-center lg:text-left">
                   <div
-                    className={`w-16 h-16 rounded-3xl flex items-center justify-center shadow-md transition-all duration-500 mx-auto ${
+                    className={`w-16 h-16 rounded-3xl flex items-center justify-center shadow-md transition-all duration-500 ${
                       activeStep === index
                         ? "bg-gradient-to-r from-slate-600 to-slate-700 scale-110 rotate-12"
                         : "bg-slate-500"
@@ -582,10 +587,10 @@ const HowItWorksSection = () => {
                   >
                     {step.icon}
                   </div>
-                  <h3 className="text-2xl font-semibold text-slate-800 group-hover:text-slate-900 transition-colors duration-300">
+                  <h3 className="text-xl sm:text-2xl font-semibold text-slate-800 group-hover:text-slate-900 transition-colors duration-300">
                     {step.title}
                   </h3>
-                  <p className="text-slate-600 text-lg leading-relaxed">
+                  <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                     {step.description}
                   </p>
 
@@ -596,7 +601,7 @@ const HowItWorksSection = () => {
                         : "max-h-0 opacity-0 scale-95"
                     }`}
                   >
-                    <p className="text-base text-slate-500 bg-slate-50/50 backdrop-blur-sm rounded-2xl p-4 shadow-inner">
+                    <p className="text-sm sm:text-base text-slate-500 bg-slate-50/50 backdrop-blur-sm rounded-2xl p-4 shadow-inner">
                       {step.details}
                     </p>
                   </div>
@@ -717,7 +722,7 @@ const FeaturesSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {features.map((feature, index) => (
             <div key={index} className="group relative perspective-1000">
               <div className="relative h-96 preserve-3d group-hover:rotate-y-180 transition-all duration-700 ease-in-out">
