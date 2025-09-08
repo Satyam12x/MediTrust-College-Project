@@ -17,8 +17,8 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-sm leading-relaxed">
-              Empowering medical donations with cutting-edge blockchain
-              technology for maximum impact and transparency.
+              Empowering medical donations with cutting-edge secure technology
+              for maximum impact and transparency.
             </p>
           </div>
 
@@ -249,7 +249,7 @@ const HeroSection = () => {
     <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Particle animations */}
       <div className="absolute inset-0 z-0">
-        {[...Array(10)].map((_, i) => (
+        {[...Array(20)].map((_, i) => (
           <div
             key={i}
             className="particle"
@@ -341,7 +341,7 @@ const HeroSection = () => {
           >
             Revolutionize Medicine Donations
             <span className="block bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent animate-gradient-text">
-              with Blockchain Trust
+              with Secure Trust
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
@@ -451,7 +451,7 @@ const HeroSection = () => {
   );
 };
 
-// Enhanced How It Works Section with improved animations
+// Re-designed How It Works Section with modern timeline design
 const HowItWorksSection = () => {
   const [activeStep, setActiveStep] = useState(0);
 
@@ -462,7 +462,7 @@ const HowItWorksSection = () => {
       description:
         "Sign up with KYC verification to ensure trust and security in our ecosystem.",
       details:
-        "Complete identity verification through our secure blockchain-based KYC process. Fast, simple, and compliant with global standards.",
+        "Complete identity verification through our secure KYC process. Fast, simple, and compliant with global standards.",
       icon: (
         <svg
           className="w-10 h-10 text-white"
@@ -483,7 +483,7 @@ const HowItWorksSection = () => {
       number: "02",
       title: "Donate Securely",
       description:
-        "Contribute medical supplies or funds via blockchain for complete transparency.",
+        "Contribute medical supplies or funds via secure platform for complete transparency.",
       details:
         "Smart contracts handle your donations automatically, ensuring funds and supplies reach their destination without intermediaries.",
       icon: (
@@ -533,7 +533,7 @@ const HowItWorksSection = () => {
       className="py-32 bg-slate-50 relative overflow-hidden"
     >
       <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxIiBmaWxsPSIjOTRhM2I4Ii8+PC9zdmc+')] pointer-events-none"></div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
           <h2 className="text-5xl font-bold text-slate-900 mb-6">
             How MediTrust Works
@@ -545,37 +545,36 @@ const HowItWorksSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 relative">
+        <div className="relative">
+          {/* Timeline line */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-slate-200">
+            <div
+              className="w-full bg-gradient-to-b from-slate-600 to-slate-500 transition-all duration-500"
+              style={{ height: `${((activeStep + 1) / steps.length) * 100}%` }}
+            ></div>
+          </div>
+
           {steps.map((step, index) => (
             <div
               key={index}
-              className={`relative group cursor-pointer transition-all duration-500 ease-out ${
-                activeStep === index ? "scale-105 z-20" : "hover:scale-102"
+              className={`relative mb-16 group cursor-pointer transition-all duration-500 ease-out ${
+                activeStep === index ? "scale-105" : "hover:scale-102"
+              } ${
+                index % 2 === 0
+                  ? "pr-[calc(50%+2rem)] text-right"
+                  : "pl-[calc(50%+2rem)] text-left"
               }`}
               onMouseEnter={() => setActiveStep(index)}
             >
-              {/* Enhanced connecting line */}
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-1/2 right-0 w-full h-1 bg-slate-200 transform translate-x-1/2 -translate-y-1/2 z-0 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-slate-600 to-slate-500 transition-all duration-500"
-                    style={{
-                      width: activeStep > index ? "100%" : "0%",
-                      transform: "translateX(-50%)",
-                    }}
-                  ></div>
-                </div>
-              )}
+              <div className="absolute left-1/2 top-10 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-slate-600 shadow-lg group-hover:scale-125 transition-all duration-300 z-20">
+                <span className="text-slate-600 font-bold">{step.number}</span>
+              </div>
 
-              <div className="relative bg-white rounded-3xl p-10 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-slate-300 transition-all duration-500 ease-out z-10 overflow-hidden group-hover:rotate-1">
+              <div className="relative bg-white rounded-3xl p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-slate-300 transition-all duration-500 ease-out overflow-hidden group-hover:rotate-1 z-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-50/0 to-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-slate-600 to-slate-700 text-white text-2xl font-bold rounded-2xl w-20 h-20 flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                  {step.number}
-                </div>
-
-                <div className="flex flex-col items-center text-center space-y-6 pt-12 relative z-10">
+                <div className="flex flex-col space-y-4 relative z-10">
                   <div
-                    className={`w-24 h-24 rounded-3xl flex items-center justify-center shadow-md transition-all duration-500 ${
+                    className={`w-16 h-16 rounded-3xl flex items-center justify-center shadow-md transition-all duration-500 mx-auto ${
                       activeStep === index
                         ? "bg-gradient-to-r from-slate-600 to-slate-700 scale-110 rotate-12"
                         : "bg-slate-500"
@@ -615,9 +614,9 @@ const HowItWorksSection = () => {
 const FeaturesSection = () => {
   const features = [
     {
-      title: "Blockchain Security",
+      title: "System Security",
       description:
-        "Immutable ledger technology ensures every transaction is verifiable and tamper-proof.",
+        "Immutable tracking technology ensures every transaction is verifiable and tamper-proof.",
       details:
         "Advanced encryption and decentralized validation protect your donations from fraud and manipulation.",
       icon: (
@@ -879,7 +878,7 @@ const TestimonialsSection = () => {
     },
     {
       quote:
-        "With blockchain tracking, we now have absolute confidence in our medical supply chain.",
+        "With secure tracking, we now have absolute confidence in our medical supply chain.",
       author: "Michael Chen",
       role: "Administrator at City Hospital Network",
       avatar: "MC",
@@ -939,7 +938,7 @@ const TestimonialsSection = () => {
 };
 
 // Main App Component
-const MeduTrustApp = () => {
+const MediTrustApp = () => {
   return (
     <div
       className="relative min-h-screen"
@@ -956,4 +955,4 @@ const MeduTrustApp = () => {
   );
 };
 
-export default MeduTrustApp;
+export default MediTrustApp;
