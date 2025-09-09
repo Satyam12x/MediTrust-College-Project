@@ -6,7 +6,11 @@ import { FaEnvelope, FaLock, FaSpinner, FaArrowLeft } from "react-icons/fa";
 
 const Login = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "", rememberMe: false });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,7 +21,10 @@ const Login = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -56,13 +63,12 @@ const Login = () => {
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        whileHover={{ scale: 1.02, x: 5 }}
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => navigate("/")}
-        className="absolute top-8 left-8 z-20 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-[#456882]/20 text-[#456882] hover:bg-white/90 transition-all duration-300 shadow-lg"
+        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#456882]/20 text-[#456882] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base"
       >
         <FaArrowLeft />
-        <span className="font-medium">Back to Home</span>
+        <span className="font-medium hidden sm:inline">Home</span>
       </motion.button>
 
       {/* Main Login Card */}
@@ -84,7 +90,7 @@ const Login = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <motion.div whileHover={{ scale: 1.05, rotate: 5 }} className="relative">
+            <div className="relative">
               <div className="w-16 h-16 bg-gradient-to-br from-[#456882] to-[#5a7a95] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl">
                 <FaLock />
               </div>
@@ -95,7 +101,7 @@ const Login = () => {
               >
                 <FaLock className="text-white text-xs" />
               </motion.div>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Title */}
@@ -105,7 +111,9 @@ const Login = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-center mb-6"
           >
-            <h2 className="text-3xl font-bold text-[#456882] mb-2">Welcome Back</h2>
+            <h2 className="text-3xl font-bold text-[#456882] mb-2">
+              Welcome Back
+            </h2>
             <p className="text-gray-600">Sign in to your MediTrust account</p>
           </motion.div>
 
@@ -189,24 +197,19 @@ const Login = () => {
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   className="p-3 bg-red-50 border border-red-200 rounded-lg"
                 >
-                  <p className="text-red-600 text-sm font-medium text-center">{error}</p>
+                  <p className="text-red-600 text-sm font-medium text-center">
+                    {error}
+                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
 
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 10px 25px rgba(69, 104, 130, 0.2)" }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-[#456882] to-[#5a7a95] text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center relative overflow-hidden"
+              className="w-full py-4 bg-gradient-to-r from-[#456882] to-[#5a7a95] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center relative overflow-hidden"
             >
-              <motion.div
-                className="absolute inset-0 bg-white/20"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.8 }}
-              />
               {loading ? (
                 <motion.div
                   animate={{ rotate: 360 }}
@@ -227,12 +230,13 @@ const Login = () => {
 
           {/* Google Login */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500 mb-4">Or continue with</p>
+            <p className="text-sm text-gray-500 mb-4 flex items-center justify-center gap-1">
+              Or continue with Google <FcGoogle className="text-lg" />
+            </p>
             <motion.button
-              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleGoogleLogin}
-              className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:shadow-lg transition-all duration-300"
+              className="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center transition-all duration-300"
             >
               <FcGoogle className="text-xl" />
             </motion.button>
