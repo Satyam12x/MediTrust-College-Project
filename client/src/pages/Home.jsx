@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // Add this import
-import Footer from '../components/Footer';
-import AuthPage from "./Login";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import Footer from "../components/Footer";
 
 // Enhanced Navbar with mobile menu and smooth animations
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const navigate = useNavigate(); // Add this hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,30 +25,29 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
-  // Add handlers for auth navigation
   const handleLoginClick = () => {
-    navigate("/auth");
+    navigate("/login");
   };
 
   const handleSignUpClick = () => {
-    navigate("/auth");
+    navigate("/signup");
   };
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
         isScrolled
-          ? "bg-white/95 backdrop-blur-xl shadow-xl border-b border-slate-100/50"
+          ? "bg-white/95 backdrop-blur-xl shadow-xl border-b border-[#1C352D]/20"
           : "bg-transparent shadow-none"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <div className="flex items-center space-x-4 group cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:rotate-6 group-hover:scale-105">
-              <span className="text-white text-xl font-bold">+</span>
+          <div className="flex items-center space-x-4 cursor-pointer">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#1C352D] to-[#2E4F3F] rounded-xl flex items-center justify-center shadow-md transition-all duration-300">
+              <span className="text-white text-xl font-bold">M</span>
             </div>
-            <span className="text-2xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors duration-300">
+            <span className="text-2xl font-bold text-[#1C352D] transition-colors duration-300">
               MediTrust
             </span>
           </div>
@@ -60,13 +59,13 @@ const Navbar = () => {
                 <button
                   key={id}
                   onClick={() => scrollToSection(id)}
-                  className="text-slate-600 hover:text-slate-800 transition-all duration-300 group relative font-medium text-base lg:text-lg"
+                  className="text-[#1C352D] hover:text-[#2E4F3F] transition-all duration-300 font-medium text-base lg:text-lg relative"
                 >
                   {id
                     .split("-")
                     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(" ")}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-600 transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#1C352D] transition-all duration-300 hover:w-full"></span>
                 </button>
               )
             )}
@@ -74,18 +73,19 @@ const Navbar = () => {
 
           <div className="flex items-center space-x-4">
             <button
-              onClick={handleLoginClick} // Add onClick handler
-              className="px-4 py-2 sm:px-6 sm:py-3 text-slate-600 hover:text-slate-800 transition-all duration-300 font-medium hover:scale-105 text-base lg:text-lg"
+              onClick={handleLoginClick}
+              className="px-4 py-2 sm:px-6 sm:py-3 text-[#1C352D] hover:text-[#2E4F3F] transition-all duration-300 font-medium text-base lg:text-lg"
             >
               Login
             </button>
-            <button
-              onClick={handleSignUpClick} // Add onClick handler
-              className="group px-4 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-500 transform hover:scale-105 shadow-md hover:shadow-xl hover:shadow-slate-500/30 font-medium flex items-center space-x-2 text-base lg:text-lg"
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSignUpClick}
+              className="px-4 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-[#1C352D]/30 font-medium flex items-center space-x-2 text-base lg:text-lg"
             >
               <span>Sign Up</span>
               <svg
-                className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                className="w-4 h-4 transition-transform duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -97,15 +97,15 @@ const Navbar = () => {
                   d="M13 7l5 5m0 0l-5 5m5-5H6"
                 />
               </svg>
-            </button>
+            </motion.button>
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2 group"
+              className="md:hidden p-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <svg
-                className="w-6 h-6 text-slate-600 group-hover:text-slate-800 transition-colors duration-300"
+                className="w-6 h-6 text-[#1C352D] transition-colors duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -127,14 +127,14 @@ const Navbar = () => {
             isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <div className="bg-white/95 backdrop-blur-md border-t border-slate-100 py-4">
+          <div className="bg-white/95 backdrop-blur-md border-t border-[#1C352D]/20 py-4">
             <div className="space-y-4 px-4">
               {["how-it-works", "features", "impact", "testimonials"].map(
                 (id) => (
                   <button
                     key={id}
                     onClick={() => scrollToSection(id)}
-                    className="block w-full text-left py-3 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-all duration-300 px-4"
+                    className="block w-full text-left py-3 text-[#1C352D] hover:text-[#2E4F3F] hover:bg-[#F0F7F6] rounded-lg transition-all duration-300 px-4"
                   >
                     {id
                       .split("-")
@@ -153,139 +153,87 @@ const Navbar = () => {
   );
 };
 
-// Enhanced Hero Section with day theme and neon-inspired animations
+// Enhanced Hero Section with wave background and subtle animations
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const navigate = useNavigate(); // Add this hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
-  // Add handler for Donate Now button
   const handleDonateClick = () => {
-    navigate("/auth");
+    navigate("/signup");
   };
 
   return (
-    <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Particle animations */}
+    <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-[#F8FBFA]">
+      {/* Wave background */}
       <div className="absolute inset-0 z-0">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `-${Math.random() * 10}s`,
-              animationDuration: `${Math.random() * 15 + 15}s`,
-              background: i % 3 === 0 ? "#475569" : "#94a3b8",
-            }}
-          ></div>
-        ))}
-      </div>
-
-      {/* SVG network visualization */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl opacity-20 animate-pulse-slow">
-          <svg
-            className="w-full h-auto"
-            viewBox="0 0 100 100"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="grad1" x1="0%" x2="100%" y1="0%" y2="0%">
-                <stop
-                  offset="0%"
-                  style={{ stopColor: "#475569", stopOpacity: 1 }}
-                />
-                <stop
-                  offset="100%"
-                  style={{ stopColor: "#94a3b8", stopOpacity: 1 }}
-                />
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur result="coloredBlur" stdDeviation="1.5" />
-                <feMerge>
-                  <feMergeNode in="coloredBlur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <path
-              d="M 10 50 Q 50 20, 90 50"
-              fill="none"
-              stroke="url(#grad1)"
-              strokeWidth="2"
-              style={{ filter: "url(#glow)" }}
-            />
-            <path
-              d="M 10 50 Q 50 80, 90 50"
-              fill="none"
-              opacity="0.5"
-              stroke="url(#grad1)"
-              strokeDasharray="4"
-              strokeWidth="1"
-            />
-            <circle
-              cx="10"
-              cy="50"
-              fill="#94a3b8"
-              r="4"
-              style={{ filter: "url(#glow)" }}
-            />
-            <circle cx="50" cy="35" fill="#475569" r="3" />
-            <circle
-              cx="90"
-              cy="50"
-              fill="#94a3b8"
-              r="4"
-              style={{ filter: "url(#glow)" }}
-            />
-            <circle cx="30" cy="37" fill="#475569" opacity="0.7" r="2" />
-            <circle cx="70" cy="37" fill="#475569" opacity="0.7" r="2" />
-          </svg>
-        </div>
+        <svg
+          className="w-full h-full opacity-10"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#1C352D"
+            fillOpacity="0.3"
+            d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+        </svg>
       </div>
 
       {/* Main content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-24 pb-12">
-        <div
-          className={`space-y-8 transition-all duration-1000 ease-out ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
-          }`}
+        <motion.div
+          initial={{ opacity: 0, translateY: 20 }}
+          animate={{
+            opacity: isVisible ? 1 : 0,
+            translateY: isVisible ? 0 : 20,
+          }}
+          transition={{ duration: 1 }}
+          className="space-y-8"
         >
           <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight tracking-tight"
-            style={{ textShadow: "0 0 15px rgba(71, 85, 105, 0.3)" }}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#1C352D] leading-tight tracking-tight"
+            style={{ textShadow: "0 0 15px rgba(28, 53, 45, 0.3)" }}
           >
-            Revolutionize Medicine Donations
-            <span className="block bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent animate-gradient-text">
-              with Secure Trust
+            Empower Healthcare
+            <span className="block bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] bg-clip-text text-transparent">
+              Through Trusted Donations
             </span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Connect donors, hospitals, and patients in a secure, transparent
-            network. Save lives, reduce waste, maximize impact.
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Seamlessly connect donors, hospitals, and patients to save lives
+            with transparency and efficiency.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
-            <button
-              onClick={handleDonateClick} // Add onClick handler
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(71,85,105,0.5)] hover:scale-105 hover:from-slate-700 hover:to-slate-800"
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDonateClick}
+              className="relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-500 hover:shadow-[0_0_20px_rgba(28,53,45,0.5)]"
             >
-              <span className="absolute h-0 w-0 rounded-full bg-white opacity-10 transition-all duration-300 ease-out group-hover:h-32 group-hover:w-32"></span>
               <span className="relative">Donate Now</span>
-            </button>
-            <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl border-2 border-slate-600 bg-transparent px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-slate-600 transition-all duration-500 ease-in-out hover:bg-slate-600 hover:text-white hover:shadow-[0_0_20px_rgba(71,85,105,0.3)] hover:scale-105">
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              className="relative inline-flex items-center justify-center rounded-xl border-2 border-[#1C352D] bg-transparent px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-[#1C352D] transition-all duration-500 hover:bg-[#1C352D] hover:text-white"
+            >
               <span className="relative">Request Help</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats section */}
-        <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, translateY: 20 }}
+          animate={{
+            opacity: isVisible ? 1 : 0,
+            translateY: isVisible ? 0 : 20,
+          }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto"
+        >
           {[
             { value: "1,234", label: "Medicines Donated Today" },
             { value: "567", label: "Lives Impacted" },
@@ -293,103 +241,34 @@ const HeroSection = () => {
           ].map((stat, index) => (
             <div
               key={index}
-              className={`bg-slate-100/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-200/50 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-500 ease-out ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-10"
-              }`}
-              style={{ transitionDelay: `${index * 200}ms` }}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-[#1C352D]/20 shadow-md transition-all duration-500"
             >
-              <p className="text-3xl sm:text-4xl font-bold text-slate-700">
+              <p className="text-3xl sm:text-4xl font-bold text-[#1C352D]">
                 {stat.value}
               </p>
-              <p className="text-xs sm:text-sm font-medium text-slate-500 uppercase tracking-wider mt-2">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider mt-2">
                 {stat.label}
               </p>
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
-
-      <style jsx>{`
-        :root {
-          --primary-color: #475569;
-          --secondary-color: #1e293b;
-          --neon-blue: #94a3b8;
-        }
-        .particle {
-          position: absolute;
-          border-radius: 50%;
-          background: var(--neon-blue);
-          animation: float 20s infinite ease-in-out;
-          opacity: 0;
-        }
-        @keyframes float {
-          0% {
-            transform: translateY(0);
-            opacity: 0;
-          }
-          10% {
-            opacity: 0.2;
-          }
-          50% {
-            transform: translateY(-100vh);
-            opacity: 0.4;
-          }
-          90% {
-            opacity: 0.1;
-          }
-          100% {
-            transform: translateY(-120vh);
-            opacity: 0;
-          }
-        }
-        @keyframes pulse-slow {
-          0%,
-          100% {
-            transform: scale(1);
-            opacity: 0.8;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 1;
-          }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 8s ease-in-out infinite;
-        }
-        @keyframes gradient-text {
-          0% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-          100% {
-            background-position: 0% 50%;
-          }
-        }
-        .animate-gradient-text {
-          background-size: 200% 200%;
-          animation: gradient-text 5s ease infinite;
-        }
-      `}</style>
     </section>
   );
 };
 
-// Re-designed How It Works Section with modern timeline design
+// Re-designed How It Works Section with circular progress layout
 const HowItWorksSection = () => {
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [
     {
       number: "01",
-      title: "Register & Verify",
+      title: "Join the Network",
       description:
-        "Sign up with KYC verification to ensure trust and security in our ecosystem.",
+        "Sign up and verify your identity to join our trusted community.",
       details:
-        "Complete identity verification through our secure KYC process. Fast, simple, and compliant with global standards.",
+        "Complete a quick and secure verification process to ensure trust and safety.",
       icon: (
         <svg
           className="w-10 h-10 text-white"
@@ -408,11 +287,10 @@ const HowItWorksSection = () => {
     },
     {
       number: "02",
-      title: "Donate Securely",
-      description:
-        "Contribute medical supplies or funds via secure platform for complete transparency.",
+      title: "Contribute",
+      description: "Donate medicines or funds securely to those in need.",
       details:
-        "Smart contracts handle your donations automatically, ensuring funds and supplies reach their destination without intermediaries.",
+        "Your contributions are securely processed to reach hospitals and patients efficiently.",
       icon: (
         <svg
           className="w-10 h-10 text-white"
@@ -431,11 +309,10 @@ const HowItWorksSection = () => {
     },
     {
       number: "03",
-      title: "Track Impact",
-      description:
-        "Monitor your donation's journey and impact in real-time with detailed analytics.",
+      title: "Track Your Impact",
+      description: "Monitor how your donations make a difference in real-time.",
       details:
-        "Receive live updates, detailed reports, and visual analytics on how your contribution is saving lives and improving healthcare.",
+        "Access detailed reports and live updates on the impact of your contributions.",
       icon: (
         <svg
           className="w-10 h-10 text-white"
@@ -457,82 +334,76 @@ const HowItWorksSection = () => {
   return (
     <section
       id="how-it-works"
-      className="py-32 bg-slate-50 relative overflow-hidden"
+      className="py-32 bg-[#F8FBFA] relative overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxIiBmaWxsPSIjOTRhM2I4Ii8+PC9zdmc+')] pointer-events-none"></div>
+      <div className="absolute inset-0 opacity-10">
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#1C352D"
+            fillOpacity="0.3"
+            d="M0,160L48,144C96,128,192,96,288,112C384,128,480,192,576,192C672,192,768,128,864,112C960,96,1056,128,1152,144C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+        </svg>
+      </div>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#1C352D] mb-6">
             How MediTrust Works
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-slate-600 to-slate-500 rounded-full mx-auto mb-6 animate-pulse"></div>
-          <p className="text-xl sm:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
-            Our intuitive process combines advanced technology with
-            human-centered design for seamless donations
+          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
+          <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            A simple, secure process to connect donors with those in need.
           </p>
         </div>
 
-        <div className="relative flex flex-col lg:block">
-          {/* Timeline line - vertical on mobile, horizontal on desktop */}
-          <div className="absolute left-0 lg:left-1/2 transform lg:-translate-x-1/2 w-full lg:w-1 h-1 lg:h-full bg-slate-200 flex lg:block flex-col">
-            <div
-              className="h-full lg:w-full bg-gradient-to-r lg:bg-gradient-to-b from-slate-600 to-slate-500 transition-all duration-500"
-              style={{
-                width: `${((activeStep + 1) / steps.length) * 100}%`,
-                height: "100%",
-              }}
-            ></div>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {steps.map((step, index) => (
-            <div
+            <motion.div
               key={index}
-              className={`relative mb-16 group cursor-pointer transition-all duration-500 ease-out flex flex-col items-center lg:items-start lg:text-left lg:mb-0 lg:pr-0 lg:pl-0 ${
-                activeStep === index ? "scale-105" : "hover:scale-102"
-              } ${
-                index % 2 === 0
-                  ? "lg:pr-[calc(50%+2rem)] lg:text-right"
-                  : "lg:pl-[calc(50%+2rem)] lg:text-left"
+              onClick={() => setActiveStep(index)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              className={`relative bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-[#1C352D]/20 transition-all duration-500 cursor-pointer ${
+                activeStep === index ? "scale-105" : ""
               }`}
-              onMouseEnter={() => setActiveStep(index)}
             >
-              <div className="absolute top-0 lg:top-10 left-1/2 lg:left-1/2 transform -translate-x-1/2 lg:-translate-y-1/2 bg-white rounded-full w-8 h-8 flex items-center justify-center border-4 border-slate-600 shadow-lg group-hover:scale-125 transition-all duration-300 z-20">
-                <span className="text-slate-600 font-bold">{step.number}</span>
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full flex items-center justify-center text-white font-bold">
+                {step.number}
               </div>
-
-              <div className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-slate-300 transition-all duration-500 ease-out z-10 overflow-hidden w-full max-w-md lg:max-w-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-50/0 to-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="flex flex-col space-y-4 relative z-10 items-center lg:items-start text-center lg:text-left">
-                  <div
-                    className={`w-16 h-16 rounded-3xl flex items-center justify-center shadow-md transition-all duration-500 ${
-                      activeStep === index
-                        ? "bg-gradient-to-r from-slate-600 to-slate-700 scale-110 rotate-12"
-                        : "bg-slate-500"
-                    }`}
-                  >
-                    {step.icon}
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-semibold text-slate-800 group-hover:text-slate-900 transition-colors duration-300">
-                    {step.title}
-                  </h3>
-                  <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                    {step.description}
-                  </p>
-
-                  <div
-                    className={`transition-all duration-500 ease-out overflow-hidden ${
-                      activeStep === index
-                        ? "max-h-32 opacity-100 scale-100"
-                        : "max-h-0 opacity-0 scale-95"
-                    }`}
-                  >
-                    <p className="text-sm sm:text-base text-slate-500 bg-slate-50/50 backdrop-blur-sm rounded-2xl p-4 shadow-inner">
-                      {step.details}
-                    </p>
-                  </div>
+              <div className="flex flex-col items-center text-center mt-8">
+                <div
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-md transition-all duration-500 ${
+                    activeStep === index
+                      ? "bg-gradient-to-r from-[#1C352D] to-[#2E4F3F]"
+                      : "bg-[#1C352D]/50"
+                  }`}
+                >
+                  {step.icon}
                 </div>
+                <h3 className="text-xl sm:text-2xl font-semibold text-[#1C352D] mt-4">
+                  {step.title}
+                </h3>
+                <p className="text-base text-gray-600 mt-2">
+                  {step.description}
+                </p>
+                <motion.div
+                  initial={{ maxHeight: 0, opacity: 0 }}
+                  animate={{
+                    maxHeight: activeStep === index ? 100 : 0,
+                    opacity: activeStep === index ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.5 }}
+                  className="text-sm text-gray-500 mt-4"
+                >
+                  {step.details}
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -540,15 +411,15 @@ const HowItWorksSection = () => {
   );
 };
 
-// Enhanced Features Section with card flips and glow effects
+// Enhanced Features Section with minimalistic cards
 const FeaturesSection = () => {
   const features = [
     {
-      title: "System Security",
+      title: "Secure Donations",
       description:
-        "Immutable tracking technology ensures every transaction is verifiable and tamper-proof.",
+        "Your contributions are protected with advanced security measures.",
       details:
-        "Advanced encryption and decentralized validation protect your donations from fraud and manipulation.",
+        "Every donation is processed securely, ensuring trust and transparency.",
       icon: (
         <svg
           className="w-12 h-12"
@@ -566,11 +437,10 @@ const FeaturesSection = () => {
       ),
     },
     {
-      title: "Real-time Tracking",
-      description:
-        "Live monitoring of donation journeys from contribution to final impact.",
+      title: "Live Tracking",
+      description: "Track your donations in real-time from start to finish.",
       details:
-        "Interactive dashboards provide instant updates, visualizations, and impact metrics for complete transparency.",
+        "Get instant updates and visualizations on how your donations are used.",
       icon: (
         <svg
           className="w-12 h-12"
@@ -588,11 +458,9 @@ const FeaturesSection = () => {
       ),
     },
     {
-      title: "Smart Matching",
-      description:
-        "AI algorithms connect donations with the most urgent medical needs globally.",
-      details:
-        "Machine learning analyzes requirements in real-time to optimize distribution and maximize life-saving potential.",
+      title: "Smart Connections",
+      description: "AI matches donations to urgent medical needs worldwide.",
+      details: "Our algorithms optimize distribution for maximum impact.",
       icon: (
         <svg
           className="w-12 h-12"
@@ -610,11 +478,9 @@ const FeaturesSection = () => {
       ),
     },
     {
-      title: "Global Network",
-      description:
-        "Seamless connections between donors, hospitals, and patients worldwide.",
-      details:
-        "Multi-language support and cross-border compliance enable truly global healthcare impact.",
+      title: "Global Reach",
+      description: "Connect with hospitals and patients across the globe.",
+      details: "Support healthcare needs worldwide with seamless integration.",
       icon: (
         <svg
           className="w-12 h-12"
@@ -635,69 +501,41 @@ const FeaturesSection = () => {
 
   return (
     <section id="features" className="py-32 bg-white relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 to-transparent pointer-events-none"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#F8FBFA]/50 to-transparent pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-slate-900 mb-6">
-            Powerful Features for Real Change
+          <h2 className="text-5xl font-bold text-[#1C352D] mb-6">
+            Why Choose MediTrust
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-slate-600 to-slate-500 rounded-full mx-auto mb-6 animate-pulse"></div>
-          <p className="text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
-            Innovative tools designed to maximize the impact of every donation
+          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
+          <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Tools designed to make your donations count.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {features.map((feature, index) => (
-            <div key={index} className="group relative perspective-1000">
-              <div className="relative h-96 preserve-3d group-hover:rotate-y-180 transition-all duration-700 ease-in-out">
-                {/* Front face */}
-                <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-white to-slate-50 rounded-3xl p-10 shadow-lg border border-slate-200 group-hover:shadow-2xl transition-shadow duration-500">
-                  <div className="w-20 h-20 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:bg-slate-600 group-hover:text-white transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-2xl font-semibold text-slate-900 mb-4 text-center group-hover:text-slate-800 transition-colors duration-300">
-                    {feature.title}
-                  </h3>
-                  <p className="text-slate-600 text-center leading-relaxed">
-                    {feature.description}
-                  </p>
-                </div>
-
-                {/* Back face */}
-                <div className="absolute inset-0 rotate-y-180 backface-hidden bg-gradient-to-br from-slate-600 to-slate-700 rounded-3xl p-10 text-white shadow-2xl">
-                  <h3 className="text-2xl font-semibold mb-4 text-center">
-                    {feature.title}
-                  </h3>
-                  <p className="text-center leading-relaxed text-slate-200">
-                    {feature.details}
-                  </p>
-                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-                    <button className="px-6 py-3 bg-white/20 rounded-xl hover:bg-white/30 transition-all duration-300 text-white font-medium">
-                      Learn More
-                    </button>
-                  </div>
-                </div>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#1C352D]/20 transition-all duration-500"
+            >
+              <div className="w-16 h-16 mx-auto bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-2xl flex items-center justify-center mb-6 shadow-md">
+                {feature.icon}
               </div>
-            </div>
+              <h3 className="text-xl font-semibold text-[#1C352D] mb-4 text-center">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 text-center">{feature.description}</p>
+              <p className="text-sm text-gray-500 mt-4 text-center">
+                {feature.details}
+              </p>
+            </motion.div>
           ))}
         </div>
       </div>
-
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .preserve-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
     </section>
   );
 };
@@ -758,37 +596,50 @@ const ImpactSection = () => {
     <section
       id="impact"
       ref={sectionRef}
-      className="py-32 bg-gradient-to-br from-slate-50 to-white relative overflow-hidden"
+      className="py-32 bg-[#F8FBFA] relative overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle,_rgba(148,163,184,0.2)_0%,_transparent_60%)] pointer-events-none animate-pulse-slow"></div>
+      <div className="absolute inset-0 opacity-10">
+        <svg
+          className="w-full h-full"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#1C352D"
+            fillOpacity="0.3"
+            d="M0,192L48,176C96,160,192,128,288,128C384,128,480,160,576,176C672,192,768,192,864,176C960,160,1056,128,1152,128C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+        </svg>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-slate-900 mb-6">
+          <h2 className="text-5xl font-bold text-[#1C352D] mb-6">
             Our Global Impact
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-slate-600 to-slate-500 rounded-full mx-auto mb-6 animate-pulse"></div>
-          <p className="text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
-            Measuring success through lives changed and communities strengthened
+          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
+          <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Making a difference, one donation at a time.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-16">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center group relative">
-              <div className="absolute inset-0 bg-slate-100/50 rounded-3xl filter blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-3xl mb-8 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 group-hover:shadow-2xl">
-                  <span className="text-4xl">{stat.icon}</span>
-                </div>
-                <h3 className="text-6xl font-bold text-slate-900 mb-4">
-                  {Math.round(counters[index]).toLocaleString()}
-                  {stat.suffix}
-                </h3>
-                <p className="text-xl text-slate-600 font-medium group-hover:text-slate-800 transition-colors duration-300">
-                  {stat.label}
-                </p>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              className="text-center relative"
+            >
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-3xl mb-8 shadow-lg">
+                <span className="text-4xl">{stat.icon}</span>
               </div>
-            </div>
+              <h3 className="text-6xl font-bold text-[#1C352D] mb-4">
+                {Math.round(counters[index]).toLocaleString()}
+                {stat.suffix}
+              </h3>
+              <p className="text-xl text-gray-600 font-medium">{stat.label}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -796,70 +647,70 @@ const ImpactSection = () => {
   );
 };
 
-// Enhanced Testimonials Section with carousel-like hover effects
+// Enhanced Testimonials Section with carousel-like cards
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      quote:
-        "MediTrust has completely transformed our donation management. The level of transparency is revolutionary!",
+      quote: "MediTrust makes donating medicines so easy and transparent!",
       author: "Dr. Sarah Johnson",
-      role: "Chief Medical Officer at Global Health Org",
+      role: "Chief Medical Officer",
       avatar: "SJ",
     },
     {
       quote:
-        "With secure tracking, we now have absolute confidence in our medical supply chain.",
+        "The real-time tracking feature gives us confidence in every donation.",
       author: "Michael Chen",
-      role: "Administrator at City Hospital Network",
+      role: "Hospital Administrator",
       avatar: "MC",
     },
     {
-      quote:
-        "The AI matching system has accelerated our response to urgent medical needs dramatically.",
+      quote: "This platform has revolutionized how we connect with donors.",
       author: "Lisa Rodriguez",
-      role: "Director at International Aid Foundation",
+      role: "Aid Foundation Director",
       avatar: "LR",
     },
   ];
 
   return (
-    <section id="testimonials" className="py-32 bg-slate-50 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none"></div>
+    <section id="testimonials" className="py-32 bg-white relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#F8FBFA]/50 to-transparent pointer-events-none"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-slate-900 mb-6">
-            Voices from Our Community
+          <h2 className="text-5xl font-bold text-[#1C352D] mb-6">
+            What Our Community Says
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-slate-600 to-slate-500 rounded-full mx-auto mb-6 animate-pulse"></div>
-          <p className="text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
-            Real experiences from those making a difference every day
+          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
+          <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Hear from those making a difference with MediTrust.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {testimonials.map((testimonial, index) => (
-            <div
+            <motion.div
               key={index}
-              className="group bg-white rounded-3xl p-10 shadow-lg hover:shadow-2xl border border-slate-200 hover:border-slate-300 transition-all duration-500 hover:scale-105 hover:rotate-1 relative overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.2 }}
+              className="bg-white/90 backdrop-blur-sm rounded-3xl p-10 shadow-lg border border-[#1C352D]/20 transition-all duration-500"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-50/0 to-slate-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-2xl mb-8 shadow-md group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                  <span className="text-3xl font-bold">
-                    {testimonial.avatar}
-                  </span>
-                </div>
-                <p className="text-slate-700 italic mb-8 text-lg leading-relaxed group-hover:text-slate-800 transition-colors duration-300">
-                  "{testimonial.quote}"
-                </p>
-                <div className="border-t border-slate-200 pt-6">
-                  <h4 className="font-semibold text-xl text-slate-900 group-hover:text-slate-800 transition-colors duration-300">
-                    {testimonial.author}
-                  </h4>
-                  <p className="text-base text-slate-500">{testimonial.role}</p>
-                </div>
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-2xl mb-8 shadow-md">
+                <span className="text-3xl font-bold">{testimonial.avatar}</span>
               </div>
-            </div>
+              <p className="text-gray-700 italic mb-8 text-lg leading-relaxed">
+                "{testimonial.quote}"
+              </p>
+              <div className="border-t border-[#1C352D]/20 pt-6">
+                <h4
+                  class
+                  squarely
+                  className="font-semibold text-xl text-[#1C352D]"
+                >
+                  {testimonial.author}
+                </h4>
+                <p className="text-base text-gray-600">{testimonial.role}</p>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -868,7 +719,6 @@ const TestimonialsSection = () => {
 };
 
 // Main App Component
-
 const MediTrustApp = () => {
   return (
     <div
