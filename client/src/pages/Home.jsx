@@ -1,112 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-
-// Footer Component
-const Footer = () => {
-  return (
-    <footer className="bg-slate-900 text-slate-300 py-16 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMzAgMGwyNi4wOTQgMTUuMTc3VjQ0LjgyM0wzMCA2MGwtMjYuMDk0LTE1LjE3N1YxNS4xNzdMMzAgMHptMCAxMC4yNzhsLTE3LjMyIDkuOTk5djE5Ljk5OEwxNi4zODcgNDAuNzIybDI2LjEyMy0xNS4xNzZ2LTE5Ljk5OEwyNi42MTMgMTkuMjc4eiIgZmlsbD0iI2ZmZiIgZmlsbC1ydWxlPSJldmVub2RkIi8+PC9zdmc+')]"></div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3 group cursor-pointer">
-              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-800 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-                <span className="text-white text-xl font-bold">+</span>
-              </div>
-              <span className="text-2xl font-bold text-white group-hover:text-slate-200 transition-colors duration-300">
-                MediTrust
-              </span>
-            </div>
-            <p className="text-sm leading-relaxed">
-              Empowering medical donations with cutting-edge secure technology
-              for maximum impact and transparency.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold text-white mb-4 text-lg">Platform</h4>
-            <ul className="space-y-3">
-              {["How It Works", "Security", "API", "Integrations"].map(
-                (item) => (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      className="hover:text-white transition-all duration-300 group flex items-center space-x-2"
-                    >
-                      <span className="w-1 h-1 bg-slate-400 rounded-full group-hover:bg-white group-hover:scale-150 transition-all duration-300"></span>
-                      <span>{item}</span>
-                    </a>
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold text-white mb-4 text-lg">Support</h4>
-            <ul className="space-y-3">
-              {[
-                "Help Center",
-                "Contact Us",
-                "Privacy Policy",
-                "Terms of Service",
-              ].map((item) => (
-                <li key={item}>
-                  <a
-                    href="#"
-                    className="hover:text-white transition-all duration-300 group flex items-center space-x-2"
-                  >
-                    <span className="w-1 h-1 bg-slate-400 rounded-full group-hover:bg-white group-hover:scale-150 transition-all duration-300"></span>
-                    <span>{item}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-semibold text-white mb-4 text-lg">Connect</h4>
-            <div className="flex space-x-4 justify-center md:justify-start">
-              {["f", "t", "in"].map((icon) => (
-                <a
-                  key={icon}
-                  href="#"
-                  className="w-10 h-10 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center transition-all duration-300 group hover:scale-110 hover:shadow-lg hover:shadow-slate-500/20"
-                >
-                  <span className="text-sm font-medium group-hover:rotate-12 transition-transform duration-300">
-                    {icon}
-                  </span>
-                </a>
-              ))}
-            </div>
-            <p className="text-sm mt-6">Subscribe to our newsletter</p>
-            <div className="flex mt-2 flex-col sm:flex-row">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="px-4 py-3 bg-slate-800 border border-slate-700 rounded-t-xl sm:rounded-l-xl sm:rounded-t-none text-sm flex-1 focus:outline-none focus:border-slate-500 transition-all duration-300"
-              />
-              <button className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white rounded-b-xl sm:rounded-r-xl sm:rounded-b-none font-medium transition-all duration-300 hover:shadow-lg hover:shadow-slate-400/20">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-slate-700 mt-12 pt-8 text-center text-sm">
-          <p>
-            &copy; 2025 MediTrust. All rights reserved. Built with passion for
-            global healthcare.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-};
+import { useNavigate } from "react-router-dom"; // Add this import
+import Footer from '../components/Footer';
+import AuthPage from "./AuthPage";
 
 // Enhanced Navbar with mobile menu and smooth animations
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate(); // Add this hook
 
   useEffect(() => {
     const handleScroll = () => {
@@ -122,6 +23,15 @@ const Navbar = () => {
       element.scrollIntoView({ behavior: "smooth" });
     }
     setIsMobileMenuOpen(false);
+  };
+
+  // Add handlers for auth navigation
+  const handleLoginClick = () => {
+    navigate("/auth");
+  };
+
+  const handleSignUpClick = () => {
+    navigate("/auth");
   };
 
   return (
@@ -163,10 +73,16 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="px-4 py-2 sm:px-6 sm:py-3 text-slate-600 hover:text-slate-800 transition-all duration-300 font-medium hover:scale-105 text-base lg:text-lg">
+            <button
+              onClick={handleLoginClick} // Add onClick handler
+              className="px-4 py-2 sm:px-6 sm:py-3 text-slate-600 hover:text-slate-800 transition-all duration-300 font-medium hover:scale-105 text-base lg:text-lg"
+            >
               Login
             </button>
-            <button className="group px-4 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-500 transform hover:scale-105 shadow-md hover:shadow-xl hover:shadow-slate-500/30 font-medium flex items-center space-x-2 text-base lg:text-lg">
+            <button
+              onClick={handleSignUpClick} // Add onClick handler
+              className="group px-4 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 transition-all duration-500 transform hover:scale-105 shadow-md hover:shadow-xl hover:shadow-slate-500/30 font-medium flex items-center space-x-2 text-base lg:text-lg"
+            >
               <span>Sign Up</span>
               <svg
                 className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
@@ -240,10 +156,16 @@ const Navbar = () => {
 // Enhanced Hero Section with day theme and neon-inspired animations
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate(); // Add this hook
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Add handler for Donate Now button
+  const handleDonateClick = () => {
+    navigate("/auth");
+  };
 
   return (
     <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
@@ -349,7 +271,10 @@ const HeroSection = () => {
             network. Save lives, reduce waste, maximize impact.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
-            <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(71,85,105,0.5)] hover:scale-105 hover:from-slate-700 hover:to-slate-800">
+            <button
+              onClick={handleDonateClick} // Add onClick handler
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(71,85,105,0.5)] hover:scale-105 hover:from-slate-700 hover:to-slate-800"
+            >
               <span className="absolute h-0 w-0 rounded-full bg-white opacity-10 transition-all duration-300 ease-out group-hover:h-32 group-hover:w-32"></span>
               <span className="relative">Donate Now</span>
             </button>
@@ -943,6 +868,7 @@ const TestimonialsSection = () => {
 };
 
 // Main App Component
+
 const MediTrustApp = () => {
   return (
     <div
