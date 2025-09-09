@@ -61,7 +61,7 @@ const Login = () => {
 
   const labelVariants = {
     resting: { y: 0, scale: 1, color: "#6B7280" },
-    floating: { y: -24, scale: 0.85, color: "#A1C2BD" },
+    floating: { y: -24, scale: 0.85, color: "#1C352D" },
   };
 
   return (
@@ -73,7 +73,7 @@ const Login = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate("/")}
-        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#A1C2BD]/20 text-[#A1C2BD] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base"
+        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#1C352D]/20 text-[#1C352D] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base"
       >
         <FaArrowLeft />
         <span className="font-medium hidden sm:inline">Home</span>
@@ -89,7 +89,7 @@ const Login = () => {
       >
         <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
           {/* Gradient overlay */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89]"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F]"></div>
 
           {/* Logo */}
           <motion.div
@@ -99,7 +99,7 @@ const Login = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#A1C2BD] to-[#5F8D89] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#1C352D] to-[#2E4F3F] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl">
                 <FaLock />
               </div>
               <motion.div
@@ -119,7 +119,7 @@ const Login = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-center mb-6"
           >
-            <h2 className="text-3xl font-bold text-[#A1C2BD] mb-2">
+            <h2 className="text-3xl font-bold text-[#1C352D] mb-2">
               Welcome Back
             </h2>
             <p className="text-gray-600">Sign in to your MediTrust account</p>
@@ -130,7 +130,7 @@ const Login = () => {
             <div className="relative">
               <motion.div
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                animate={{ color: formData.email ? "#A1C2BD" : "#9CA3AF" }}
+                animate={{ color: formData.email ? "#1C352D" : "#9CA3AF" }}
               >
                 <FaEnvelope />
               </motion.div>
@@ -147,7 +147,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 whileFocus={{ scale: 1.02 }}
-                className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                 aria-label="Email Address"
               />
             </div>
@@ -155,7 +155,7 @@ const Login = () => {
             <div className="relative">
               <motion.div
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                animate={{ color: formData.password ? "#A1C2BD" : "#9CA3AF" }}
+                animate={{ color: formData.password ? "#1C352D" : "#9CA3AF" }}
               >
                 <FaLock />
               </motion.div>
@@ -172,13 +172,13 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 whileFocus={{ scale: 1.02 }}
-                className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                 aria-label="Password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#A1C2BD] transition-colors duration-300"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1C352D] transition-colors duration-300"
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
@@ -191,14 +191,14 @@ const Login = () => {
                   name="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="h-5 w-5 text-[#A1C2BD] border-gray-300 rounded focus:ring-[#A1C2BD]/50"
+                  className="h-5 w-5 text-[#1C352D] border-gray-300 rounded focus:ring-[#1C352D]/50"
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
               <button
                 type="button"
                 onClick={handleForgotPassword}
-                className="text-sm text-[#A1C2BD] hover:text-[#5F8D89] font-medium hover:underline transition-all duration-300"
+                className="text-sm text-[#1C352D] hover:text-[#2E4F3F] font-medium hover:underline transition-all duration-300"
               >
                 Forgot Password?
               </button>
@@ -223,7 +223,7 @@ const Login = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center relative overflow-hidden"
+              className="w-full py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center relative overflow-hidden"
             >
               {loading ? (
                 <motion.div
@@ -264,7 +264,7 @@ const Login = () => {
               Don't have an account?{" "}
               <button
                 onClick={() => navigate("/signup")}
-                className="text-[#A1C2BD] hover:text-[#5F8D89] font-semibold hover:underline transition-all duration-300"
+                className="text-[#1C352D] hover:text-[#2E4F3F] font-semibold hover:underline transition-all duration-300"
               >
                 Sign Up
               </button>
@@ -275,7 +275,7 @@ const Login = () => {
 
       <style jsx>{`
         input:focus {
-          box-shadow: 0 0 0 3px rgba(161, 194, 189, 0.1);
+          box-shadow: 0 0 0 3px rgba(28, 53, 45, 0.1);
         }
       `}</style>
     </div>

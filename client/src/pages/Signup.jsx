@@ -62,9 +62,9 @@ const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
             onFocus={() => setOtpFocused(index)}
             onBlur={() => setOtpFocused(null)}
             whileFocus={{ scale: 1.05 }}
-            className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A1C2BD]/50 transition-all duration-300 bg-white/80 backdrop-blur-sm ${
+            className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1C352D]/50 transition-all duration-300 bg-white/80 backdrop-blur-sm ${
               otpFocused === index
-                ? "border-[#A1C2BD] shadow-lg bg-white"
+                ? "border-[#1C352D] shadow-lg bg-white"
                 : otp[index]
                 ? "border-green-500 bg-green-50"
                 : "border-gray-300"
@@ -192,7 +192,7 @@ const Signup = () => {
 
   const labelVariants = {
     resting: { y: 0, scale: 1, color: "#6B7280" },
-    floating: { y: -24, scale: 0.85, color: "#A1C2BD" },
+    floating: { y: -24, scale: 0.85, color: "#1C352D" },
   };
 
   const steps = ["Personal Details", "Credentials", "Verification"];
@@ -207,7 +207,7 @@ const Signup = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate("/")}
-        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#A1C2BD]/20 text-[#A1C2BD] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base"
+        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#1C352D]/20 text-[#1C352D] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base"
       >
         <FaArrowLeft />
         <span className="font-medium hidden sm:inline">Home</span>
@@ -223,7 +223,7 @@ const Signup = () => {
       >
         <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
           {/* Gradient overlay */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89]"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F]"></div>
 
           {/* Logo */}
           <motion.div
@@ -233,7 +233,7 @@ const Signup = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#A1C2BD] to-[#5F8D89] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#1C352D] to-[#2E4F3F] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl">
                 <FaLock />
               </div>
               <motion.div
@@ -253,7 +253,7 @@ const Signup = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-center mb-6"
           >
-            <h2 className="text-3xl font-bold text-[#A1C2BD] mb-2">
+            <h2 className="text-3xl font-bold text-[#1C352D] mb-2">
               Join MediTrust
             </h2>
             <p className="text-gray-600">Create your secure account</p>
@@ -268,7 +268,7 @@ const Signup = () => {
           >
             <div className="absolute top-4 left-0 w-full h-0.5 bg-gray-200 rounded-full">
               <motion.div
-                className="h-full bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89] rounded-full"
+                className="h-full bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full"
                 initial={{ width: "0%" }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
@@ -284,14 +284,14 @@ const Signup = () => {
                     index < step
                       ? "bg-green-500"
                       : index === step - 1
-                      ? "bg-[#A1C2BD]"
+                      ? "bg-[#1C352D]"
                       : "bg-gray-300"
                   }`}
                   animate={{
                     scale: index === step - 1 ? 1.1 : 1,
                     boxShadow:
                       index === step - 1
-                        ? "0 4px 15px rgba(161, 194, 189, 0.3)"
+                        ? "0 4px 15px rgba(28, 53, 45, 0.3)"
                         : "none",
                   }}
                   transition={{ duration: 0.3 }}
@@ -303,7 +303,7 @@ const Signup = () => {
                   )}
                   {index === step - 1 && (
                     <motion.div
-                      className="absolute inset-0 rounded-full border-2 border-[#A1C2BD]"
+                      className="absolute inset-0 rounded-full border-2 border-[#1C352D]"
                       animate={{ scale: [1, 1.3, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                     />
@@ -332,7 +332,7 @@ const Signup = () => {
                     <motion.div
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
                       animate={{
-                        color: formData.firstName ? "#A1C2BD" : "#9CA3AF",
+                        color: formData.firstName ? "#1C352D" : "#9CA3AF",
                       }}
                     >
                       <FaUser />
@@ -350,7 +350,7 @@ const Signup = () => {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                       aria-label="First Name"
                     />
                   </div>
@@ -358,7 +358,7 @@ const Signup = () => {
                     <motion.div
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
                       animate={{
-                        color: formData.lastName ? "#A1C2BD" : "#9CA3AF",
+                        color: formData.lastName ? "#1C352D" : "#9CA3AF",
                       }}
                     >
                       <FaUser />
@@ -376,14 +376,14 @@ const Signup = () => {
                       value={formData.lastName}
                       onChange={handleInputChange}
                       whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                       aria-label="Last Name"
                     />
                   </div>
                   <div className="relative">
                     <motion.div
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      animate={{ color: formData.age ? "#A1C2BD" : "#9CA3AF" }}
+                      animate={{ color: formData.age ? "#1C352D" : "#9CA3AF" }}
                     >
                       <FaUser />
                     </motion.div>
@@ -400,7 +400,7 @@ const Signup = () => {
                       value={formData.age}
                       onChange={handleInputChange}
                       whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                       aria-label="Age"
                     />
                   </div>
@@ -408,7 +408,7 @@ const Signup = () => {
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={handleNextStep}
-                    className="w-full py-4 bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89] text-white rounded-xl font-semibold transition-all duration-300"
+                    className="w-full py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300"
                   >
                     <div className="flex items-center justify-center gap-2">
                       <FaLock />
@@ -430,7 +430,7 @@ const Signup = () => {
                     <motion.div
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
                       animate={{
-                        color: formData.email ? "#A1C2BD" : "#9CA3AF",
+                        color: formData.email ? "#1C352D" : "#9CA3AF",
                       }}
                     >
                       <FaEnvelope />
@@ -448,7 +448,7 @@ const Signup = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                       aria-label="Email Address"
                     />
                   </div>
@@ -456,7 +456,7 @@ const Signup = () => {
                     <motion.div
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
                       animate={{
-                        color: formData.password ? "#A1C2BD" : "#9CA3AF",
+                        color: formData.password ? "#1C352D" : "#9CA3AF",
                       }}
                     >
                       <FaLock />
@@ -474,13 +474,13 @@ const Signup = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                       aria-label="Password"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#A1C2BD] transition-colors duration-300"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1C352D] transition-colors duration-300"
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
@@ -489,7 +489,7 @@ const Signup = () => {
                     <motion.div
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
                       animate={{
-                        color: formData.confirmPassword ? "#A1C2BD" : "#9CA3AF",
+                        color: formData.confirmPassword ? "#1C352D" : "#9CA3AF",
                       }}
                     >
                       <FaLock />
@@ -509,7 +509,7 @@ const Signup = () => {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#A1C2BD] focus:ring-2 focus:ring-[#A1C2BD]/20 transition-all duration-300"
+                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
                       aria-label="Confirm Password"
                     />
                     <button
@@ -517,7 +517,7 @@ const Signup = () => {
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#A1C2BD] transition-colors duration-300"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1C352D] transition-colors duration-300"
                     >
                       {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
@@ -536,7 +536,7 @@ const Signup = () => {
                       type="button"
                       onClick={handleNextStep}
                       disabled={loading}
-                      className="flex-1 py-4 bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                      className="flex-1 py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
                     >
                       {loading ? (
                         <motion.div
@@ -607,7 +607,7 @@ const Signup = () => {
                           key={type.value}
                           className={`flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
                             formData.userType === type.value
-                              ? "border-[#A1C2BD] bg-gray-50"
+                              ? "border-[#1C352D] bg-gray-50"
                               : "border-gray-200"
                           }`}
                         >
@@ -619,7 +619,7 @@ const Signup = () => {
                             onChange={handleInputChange}
                             className="sr-only"
                           />
-                          <type.icon className="text-2xl mb-1 text-[#A1C2BD]" />
+                          <type.icon className="text-2xl mb-1 text-[#1C352D]" />
                           <span className="text-xs font-medium text-gray-700">
                             {type.label}
                           </span>
@@ -633,7 +633,7 @@ const Signup = () => {
                       name="agreeTerms"
                       checked={formData.agreeTerms}
                       onChange={handleInputChange}
-                      className="h-5 w-5 text-[#A1C2BD] border-gray-300 rounded focus:ring-[#A1C2BD]/50"
+                      className="h-5 w-5 text-[#1C352D] border-gray-300 rounded focus:ring-[#1C352D]/50"
                       whileFocus={{ scale: 1.05 }}
                     />
                     <label className="text-sm text-gray-600 leading-relaxed">
@@ -643,7 +643,7 @@ const Signup = () => {
                         onClick={() =>
                           alert("Terms of Service - Feature coming soon!")
                         }
-                        className="text-[#A1C2BD] hover:text-[#5F8D89] underline transition-all duration-300"
+                        className="text-[#1C352D] hover:text-[#2E4F3F] underline transition-all duration-300"
                       >
                         Terms of Service
                       </button>{" "}
@@ -653,7 +653,7 @@ const Signup = () => {
                         onClick={() =>
                           alert("Privacy Policy - Feature coming soon!")
                         }
-                        className="text-[#A1C2BD] hover:text-[#5F8D89] underline transition-all duration-300"
+                        className="text-[#1C352D] hover:text-[#2E4F3F] underline transition-all duration-300"
                       >
                         Privacy Policy
                       </button>
@@ -672,7 +672,7 @@ const Signup = () => {
                       whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={loading}
-                      className="flex-1 py-4 bg-gradient-to-r from-[#A1C2BD] to-[#5F8D89] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                      className="flex-1 py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
                     >
                       {loading ? (
                         <motion.div
@@ -736,7 +736,7 @@ const Signup = () => {
               Already have an account?{" "}
               <button
                 onClick={() => navigate("/login")}
-                className="text-[#A1C2BD] hover:text-[#5F8D89] font-semibold hover:underline transition-all duration-300"
+                className="text-[#1C352D] hover:text-[#2E4F3F] font-semibold hover:underline transition-all duration-300"
               >
                 Sign In
               </button>
@@ -747,7 +747,7 @@ const Signup = () => {
 
       <style jsx>{`
         input:focus {
-          box-shadow: 0 0 0 3px rgba(161, 194, 189, 0.1);
+          box-shadow: 0 0 0 3px rgba(28, 53, 45, 0.1);
         }
         .sr-only {
           position: absolute;
