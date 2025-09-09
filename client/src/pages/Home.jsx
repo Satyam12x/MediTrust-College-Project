@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom"; // Add this import
 import Footer from '../components/Footer';
-import AuthPage from "./AuthPage";
+import AuthPage from "./Login";
 
 // Enhanced Navbar with mobile menu and smooth animations
 const Navbar = () => {
