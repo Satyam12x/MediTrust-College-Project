@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
@@ -16,7 +16,6 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import axios from "axios";
-import "../styles/Signup.css";
 
 const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
   const inputRefs = useRef([]);
@@ -43,6 +42,10 @@ const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
     if (/^\d{6}$/.test(pastedData)) {
       setOtp(pastedData);
       inputRefs.current[OTP_LENGTH - 1].focus();
+    } else {
+      setOtpFocused(null);
+      setOtp("");
+      alert("Invalid OTP format");
     }
   };
 
@@ -93,6 +96,7 @@ const Signup = () => {
     confirmPassword: "",
     userType: "donor",
     agreeTerms: false,
+    registrationNumber: "", // Added for hospital
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -103,11 +107,16 @@ const Signup = () => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : type === "number" ? Number(value) : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? Number(value)
+          : value.trim(),
     }));
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (step === 1) {
       if (!formData.firstName || !formData.lastName || !formData.age) {
         setError("Please fill in all fields");
@@ -117,8 +126,15 @@ const Signup = () => {
         setError("You must be at least 18 years old");
         return;
       }
+      if (formData.userType === "hospital" && !formData.registrationNumber) {
+        setError("Please provide a registration number for hospital");
+        return;
+      }
     } else if (step === 2) {
-      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      if (
+        !formData.email ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      ) {
         setError("Please enter a valid email address");
         return;
       }
@@ -130,8 +146,36 @@ const Signup = () => {
         setError("Passwords do not match");
         return;
       }
+      try {
+        setLoading(true);
+        const response = await axios.post("http://localhost:5000/api/signup", {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          age: formData.age,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          userType: formData.userType,
+          agreeTerms: formData.agreeTerms,
+          registrationNumber:
+            formData.userType === "hospital"
+              ? formData.registrationNumber
+              : undefined,
+        });
+        setOtpSent(true);
+        setError("");
+        alert(response.data.message || "OTP sent to your email");
+      } catch (err) {
+        console.error("Signup Error:", err.response?.data);
+        setError(
+          err.response?.data?.error || "Failed to send OTP. Please try again."
+        );
+        setLoading(false);
+        return;
+      }
     }
     setError("");
+    setLoading(false);
     setStep(step + 1);
   };
 
@@ -143,7 +187,10 @@ const Signup = () => {
   };
 
   const handleVerifyOtp = async () => {
-    if (!formData.userType || !["donor", "patient", "hospital"].includes(formData.userType)) {
+    if (
+      !formData.userType ||
+      !["donor", "patient", "hospital"].includes(formData.userType)
+    ) {
       setError("Please select a valid user type");
       return;
     }
@@ -157,25 +204,20 @@ const Signup = () => {
     }
     try {
       setLoading(true);
-      // Send signup request
-      console.log("Signup payload:", formData);
-      const signupResponse = await axios.post("http://localhost:5000/api/signup", formData);
-      setOtpSent(true);
-      setError("");
-      alert(signupResponse.data.message);
-
-      // Verify OTP
-      const otpResponse = await axios.post("http://localhost:5000/api/otp/verify", {
-        email: formData.email,
-        otp,
-      });
+      const otpResponse = await axios.post(
+        "http://localhost:5000/api/otp/verify",
+        {
+          email: formData.email,
+          otp,
+        }
+      );
       setLoading(false);
-      alert(otpResponse.data.message);
+      alert(otpResponse.data.message || "Account verified successfully");
       localStorage.setItem("token", otpResponse.data.token);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to sign up or verify OTP");
-      console.error("Error details:", err.response?.data?.details);
+      setError(err.response?.data?.error || "Failed to verify OTP");
+      console.error("OTP Verification Error:", err.response?.data);
       setLoading(false);
     }
   };
@@ -282,21 +324,24 @@ const Signup = () => {
               />
             </div>
             {steps.map((stepName, index) => (
-              <><div
+              <div
                 key={index}
                 className="flex flex-col items-center relative z-10"
               >
                 <motion.div
                   whileHover={{ scale: 1.1 }}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold relative ${index < step
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold relative ${
+                    index < step
                       ? "bg-[#4B4A8C]"
                       : index === step - 1
-                        ? "bg-[#19183B]"
-                        : "bg-[#E6E6FA]"}`}
+                      ? "bg-[#19183B]"
+                      : "bg-[#E6E6FA]"
+                  }`}
                   animate={{
-                    boxShadow: index === step - 1
-                      ? "0 4px 15px rgba(25, 24, 59, 0.3)"
-                      : "none",
+                    boxShadow:
+                      index === step - 1
+                        ? "0 4px 15px rgba(25, 24, 59, 0.3)"
+                        : "none",
                   }}
                   transition={{ duration: 0.3 }}
                 >
@@ -309,11 +354,13 @@ const Signup = () => {
                     <motion.div
                       className="absolute inset-0 rounded-full border-2 border-[#4B4A8C]"
                       animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }} />
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
                   )}
-                </div><span className="text-xs text-[#6B7280] mt-2 font-medium">
+                </motion.div>
+                <span className="text-xs text-[#6B7280] mt-2 font-medium">
                   {stepName}
-                </span></>
+                </span>
               </div>
             ))}
           </motion.div>
@@ -409,6 +456,39 @@ const Signup = () => {
                       min="18"
                     />
                   </div>
+                  {formData.userType === "hospital" && (
+                    <div className="relative">
+                      <motion.div
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
+                        animate={{
+                          color: formData.registrationNumber
+                            ? "#19183B"
+                            : "#6B7280",
+                        }}
+                      >
+                        <FaHospital className="group-hover:scale-110 transition-transform duration-300" />
+                      </motion.div>
+                      <motion.label
+                        className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
+                        animate={
+                          formData.registrationNumber ? "floating" : "resting"
+                        }
+                        variants={labelVariants}
+                      >
+                        Registration Number
+                      </motion.label>
+                      <motion.input
+                        type="text"
+                        name="registrationNumber"
+                        value={formData.registrationNumber}
+                        onChange={handleInputChange}
+                        whileFocus={{ scale: 1.03 }}
+                        className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
+                        aria-label="Registration Number"
+                        required
+                      />
+                    </div>
+                  )}
                   <motion.button
                     whileHover={{
                       scale: 1.05,
@@ -417,7 +497,8 @@ const Signup = () => {
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={handleNextStep}
-                    className="w-full py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 hover:bg-[#4B4A8C]"
+                    disabled={loading}
+                    className="w-full py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 hover:bg-[#4B4A8C] disabled:opacity-50"
                   >
                     <div className="flex items-center justify-center gap-2">
                       <FaLock className="group-hover:scale-110 transition-transform duration-300" />
@@ -562,10 +643,25 @@ const Signup = () => {
                       disabled={loading}
                       className="flex-1 py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
                     >
-                      <div className="flex items-center gap-2">
-                        <FaLock className="group-hover:scale-110 transition-transform duration-300" />
-                        Next
-                      </div>
+                      {loading ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <FaSpinner />
+                          Sending OTP...
+                        </motion.div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <FaLock className="group-hover:scale-110 transition-transform duration-300" />
+                          Next
+                        </div>
+                      )}
                     </motion.button>
                   </div>
                 </motion.div>
@@ -583,6 +679,11 @@ const Signup = () => {
                     <label className="block text-center text-[#2D2D2D] font-medium text-sm">
                       Enter Verification Code
                     </label>
+                    {otpSent && (
+                      <p className="text-center text-[#6B7280] text-sm">
+                        OTP sent to {formData.email}
+                      </p>
+                    )}
                     <OtpInput
                       otp={otp}
                       setOtp={setOtp}
@@ -698,7 +799,7 @@ const Signup = () => {
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={handleVerifyOtp}
-                      disabled={loading || !formData.agreeTerms}
+                      disabled={loading || !formData.agreeTerms || !otpSent}
                       className="flex-1 py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
                     >
                       {loading ? (
