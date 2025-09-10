@@ -15,8 +15,8 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+import axios from "axios";
 
-// OTP Input Component
 const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
   const inputRefs = useRef([]);
   const OTP_LENGTH = 6;
@@ -79,7 +79,6 @@ const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
 
 const Signup = () => {
   const [step, setStep] = useState(1);
-  const [isVisible, setIsVisible] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpFocused, setOtpFocused] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -99,10 +98,6 @@ const Signup = () => {
   const [otpSent, setOtpSent] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -111,7 +106,7 @@ const Signup = () => {
     }));
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (step === 1) {
       if (!formData.firstName || !formData.lastName || !formData.age) {
         setError("Please fill in all fields");
@@ -137,14 +132,21 @@ const Signup = () => {
         setError("Passwords do not match");
         return;
       }
-      // Send OTP here
-      setLoading(true);
-      setError("");
-      setTimeout(() => {
+      try {
+        setLoading(true);
+        const response = await axios.post("http://localhost:5000/api/signup", {
+          ...formData,
+          userType: formData.userType,
+          agreeTerms: formData.agreeTerms,
+        });
         setOtpSent(true);
+        setError("");
+        alert(response.data.message);
+      } catch (err) {
+        setError(err.response?.data?.error || "Failed to send OTP");
         setLoading(false);
-        alert("OTP sent to your email! (Simulated)");
-      }, 1000);
+        return;
+      }
     }
     setError("");
     setStep(step + 1);
@@ -157,34 +159,28 @@ const Signup = () => {
     }
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     if (!otp || !/^\d{6}$/.test(otp)) {
       setError("Please enter a valid 6-digit OTP");
       return;
     }
-    setLoading(true);
-    setError("");
-    // Simulate OTP verification
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        "http://localhost:5000/api/otp/verify",
+        {
+          email: formData.email,
+          otp,
+        }
+      );
       setLoading(false);
-      alert("OTP verified! (Simulated)");
-    }, 1000);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.agreeTerms) {
-      setError("You must agree to the terms");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    // Simulate signup
-    setTimeout(() => {
-      setLoading(false);
-      alert("Account created successfully! (Simulated)");
+      alert(response.data.message);
+      localStorage.setItem("token", response.data.token);
       navigate("/");
-    }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.error || "Invalid OTP");
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -204,7 +200,6 @@ const Signup = () => {
       className="min-h-screen bg-[#F8F9FA] flex items-center justify-center px-4 relative overflow-hidden"
       style={{ fontFamily: '"Space Grotesk", "Noto Sans", sans-serif' }}
     >
-      {/* Corner gradients */}
       <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
         <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
       </div>
@@ -212,7 +207,6 @@ const Signup = () => {
         <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
       </div>
 
-      {/* Back to Home Button */}
       <motion.button
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -229,19 +223,15 @@ const Signup = () => {
         <span className="font-medium hidden sm:inline">Home</span>
       </motion.button>
 
-      {/* Main Signup Card */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        style={{ perspective: "1000px" }}
         className="w-full max-w-md mx-4 relative z-10"
       >
         <div className="bg-[#F8F9FA]/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#E6E6FA]/20 p-8 relative overflow-hidden">
-          {/* Gradient overlay */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#19183B] to-[#4B4A8C]"></div>
 
-          {/* Logo */}
           <motion.div
             className="flex justify-center mb-6"
             initial={{ y: -20, opacity: 0 }}
@@ -268,7 +258,6 @@ const Signup = () => {
             </div>
           </motion.div>
 
-          {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -281,7 +270,6 @@ const Signup = () => {
             <p className="text-[#6B7280]">Create your secure account</p>
           </motion.div>
 
-          {/* Progress Indicator */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -338,8 +326,7 @@ const Signup = () => {
             ))}
           </motion.div>
 
-          {/* Form Content */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
@@ -589,7 +576,7 @@ const Signup = () => {
                         </motion.div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <FaEnvelope className="group-hover:scale-110 transition-transform duration-300" />
+                          <FaLock className="group-hover:scale-110 transition-transform duration-300" />
                           Next & Send OTP
                         </div>
                       )}
@@ -723,8 +710,9 @@ const Signup = () => {
                         boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
                       }}
                       whileTap={{ scale: 0.98 }}
-                      type="submit"
-                      disabled={loading}
+                      type="button"
+                      onClick={handleVerifyOtp}
+                      disabled={loading || !formData.agreeTerms}
                       className="flex-1 py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
                     >
                       {loading ? (
@@ -738,12 +726,12 @@ const Signup = () => {
                           className="flex items-center gap-2"
                         >
                           <FaSpinner />
-                          Signing Up...
+                          Verifying...
                         </motion.div>
                       ) : (
                         <div className="flex items-center gap-2">
                           <FaLock className="group-hover:scale-110 transition-transform duration-300" />
-                          Complete Signup
+                          Verify OTP
                         </div>
                       )}
                     </motion.button>
@@ -768,7 +756,6 @@ const Signup = () => {
             </AnimatePresence>
           </form>
 
-          {/* Google Login */}
           <motion.button
             whileHover={{
               scale: 1.05,
@@ -776,13 +763,13 @@ const Signup = () => {
             }}
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
-            className="mt-6 w-full py-4 bg-[#F8F9FA] border border-[#E6E6FA] rounded-xl flex items-center justify-center gap-2 text-[#2D2D2D] font-medium transition-all duration-300 hover:border-[#4B4A8C] hover:bg-[#E6E6FA]"
+            disabled
+            className="mt-6 w-full py-4 bg-[#F8F9FA] border border-[#E6E6FA] rounded-xl flex items-center justify-center gap-2 text-[#2D2D2D] font-medium transition-all duration-300 opacity-50 cursor-not-allowed"
           >
-            <FcGoogle className="text-xl group-hover:scale-110 transition-transform duration-300" />
-            Continue with Google
+            <FcGoogle className="text-xl" />
+            Continue with Google (Coming Soon)
           </motion.button>
 
-          {/* Login Link */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -818,6 +805,11 @@ const Signup = () => {
           clip: rect(0, 0, 0, 0);
           white-space: nowrap;
           border: 0;
+        }
+        @media (max-width: 640px) {
+          .grid-cols-3 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
         }
       `}</style>
     </div>
