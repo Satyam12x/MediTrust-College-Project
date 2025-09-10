@@ -1,30 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import {
+  FaArrowLeft,
   FaEnvelope,
   FaLock,
   FaEye,
   FaEyeSlash,
   FaSpinner,
-  FaArrowLeft,
 } from "react-icons/fa";
+import axios from "axios";
 
 const Login = () => {
-  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setIsVisible(true);
+    // Clear form data and error on component mount
+    setFormData({ email: "", password: "", rememberMe: false });
+    setError("");
   }, []);
 
   const handleInputChange = (e) => {
@@ -35,28 +37,52 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    // Simulate login (replace with actual API call)
-    setTimeout(() => {
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await axios.post("http://localhost:5000/api/login", {
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe,
+      });
       setLoading(false);
-      if (!formData.email || !formData.password) {
-        setError("Please fill in all fields");
-        return;
-      }
-      alert("Login successful! (Simulated)");
+      localStorage.setItem("token", response.data.token);
+      alert("Login successful!");
       navigate("/");
-    }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.error || "Login failed");
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address");
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        "http://localhost:5000/api/forgot-password",
+        {
+          email: formData.email,
+        }
+      );
+      setLoading(false);
+      alert(response.data.message);
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to send reset link");
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
     alert("Google login - Feature coming soon!");
-  };
-
-  const handleForgotPassword = () => {
-    alert("Password reset link sent to your email!");
   };
 
   const labelVariants = {
@@ -69,7 +95,6 @@ const Login = () => {
       className="min-h-screen bg-[#F8F9FA] flex items-center justify-center px-4 relative overflow-hidden"
       style={{ fontFamily: '"Space Grotesk", "Noto Sans", sans-serif' }}
     >
-      {/* Corner gradients */}
       <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
         <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
       </div>
@@ -77,12 +102,14 @@ const Login = () => {
         <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
       </div>
 
-      {/* Back to Home Button */}
       <motion.button
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)" }}
+        whileHover={{
+          scale: 1.05,
+          boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+        }}
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate("/")}
         className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-[#F8F9FA]/80 backdrop-blur-sm rounded-full border border-[#19183B]/20 text-[#2D2D2D] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base hover:bg-[#E6E6FA]"
@@ -91,19 +118,15 @@ const Login = () => {
         <span className="font-medium hidden sm:inline">Home</span>
       </motion.button>
 
-      {/* Main Login Card */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 50 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        style={{ perspective: "1000px" }}
         className="w-full max-w-md mx-4 relative z-10"
       >
         <div className="bg-[#F8F9FA]/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#E6E6FA]/20 p-8 relative overflow-hidden">
-          {/* Gradient overlay */}
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#19183B] to-[#4B4A8C]"></div>
 
-          {/* Logo */}
           <motion.div
             className="flex justify-center mb-6"
             initial={{ y: -20, opacity: 0 }}
@@ -112,7 +135,10 @@ const Login = () => {
           >
             <div className="relative">
               <motion.div
-                whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)" }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                }}
                 className="w-16 h-16 bg-gradient-to-br from-[#19183B] to-[#4B4A8C] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl"
               >
                 <FaLock className="group-hover:rotate-12 transition-transform duration-300" />
@@ -127,7 +153,6 @@ const Login = () => {
             </div>
           </motion.div>
 
-          {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -140,12 +165,13 @@ const Login = () => {
             <p className="text-[#6B7280]">Sign in to your MediTrust account</p>
           </motion.div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="relative">
               <motion.div
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
-                animate={{ color: formData.email ? "#19183B" : "#6B7280" }}
+                animate={{
+                  color: formData.email ? "#19183B" : "#6B7280",
+                }}
               >
                 <FaEnvelope className="group-hover:scale-110 transition-transform duration-300" />
               </motion.div>
@@ -166,11 +192,12 @@ const Login = () => {
                 aria-label="Email Address"
               />
             </div>
-
             <div className="relative">
               <motion.div
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
-                animate={{ color: formData.password ? "#19183B" : "#6B7280" }}
+                animate={{
+                  color: formData.password ? "#19183B" : "#6B7280",
+                }}
               >
                 <FaLock className="group-hover:scale-110 transition-transform duration-300" />
               </motion.div>
@@ -199,7 +226,6 @@ const Login = () => {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </motion.button>
             </div>
-
             <div className="flex items-center justify-between">
               <label className="flex items-center cursor-pointer">
                 <motion.input
@@ -222,33 +248,24 @@ const Login = () => {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#4B4A8C] transition-all duration-200 group-hover:w-full"></span>
               </motion.button>
             </div>
-
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  className="p-3 bg-red-50 border border-red-200 rounded-lg"
-                >
-                  <p className="text-red-600 text-sm font-medium text-center">
-                    {error}
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)" }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center relative overflow-hidden hover:bg-[#4B4A8C]"
+              className="w-full py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
             >
               {loading ? (
                 <motion.div
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                   className="flex items-center gap-2"
                 >
                   <FaSpinner />
@@ -261,20 +278,33 @@ const Login = () => {
                 </div>
               )}
             </motion.button>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                className="p-3 bg-red-50 border border-red-200 rounded-lg"
+              >
+                <p className="text-red-600 text-sm font-medium text-center">
+                  {error}
+                </p>
+              </motion.div>
+            )}
           </form>
 
-          {/* Google Login */}
           <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)" }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+            }}
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
-            className="mt-6 w-full py-4 bg-[#F8F9FA] border border-[#E6E6FA] rounded-xl flex items-center justify-center gap-2 text-[#2D2D2D] font-medium transition-all duration-300 hover:border-[#4B4A8C] hover:bg-[#E6E6FA]"
+            disabled
+            className="mt-6 w-full py-4 bg-[#F8F9FA] border border-[#E6E6FA] rounded-xl flex items-center justify-center gap-2 text-[#2D2D2D] font-medium transition-all duration-300 opacity-50 cursor-not-allowed"
           >
-            <FcGoogle className="text-xl group-hover:scale-110 transition-transform duration-300" />
-            Continue with Google
+            <FcGoogle className="text-xl" />
+            Continue with Google (Coming Soon)
           </motion.button>
 
-          {/* Signup Link */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -299,6 +329,17 @@ const Login = () => {
       <style jsx>{`
         input:focus {
           box-shadow: 0 0 0 3px rgba(75, 74, 140, 0.2);
+        }
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
         }
       `}</style>
     </div>
