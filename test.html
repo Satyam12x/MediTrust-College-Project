@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect" />
+    <link
+      as="style"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Manrope%3Awght%40400%3B500%3B700%3B800&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+      onload="this.rel='stylesheet'"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <title>Stitch Design</title>
+    <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style type="text/tailwindcss">
+      :root {
+        --primary-color: #53d22d;
+      }
+      body {
+        font-family: "Manrope", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white">
+    <div class="flex min-h-screen">
+      <aside class="w-64 bg-[#111827] p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-8">
+            <img
+              alt="User avatar"
+              class="rounded-full size-12"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuARb0gYAkAxRyUdJV3IYHv9LVzgVlt8r7obGLPw9_JKSJSUYxRaCaBoNBP_ab7xJS-vXN64fuV2qGJA6spQvjfjUnn2OUs0mx9r3AtfinmN5rsemTNn9o8VznDY4UUR7oY5WYTzBiqbLYQHKHzet7q4cHpL4x22B5pQHhszXwhUe5UCQ4IOfqakJzi94Z2AAk15c9yfdt5u1LCwxYqOoISAH9avusFFywaN0RzV4GRatTehxD_W8UrNTxJL-ZrkkSYU6NotPeDVGuz6"
+            />
+            <div>
+              <h1 class="font-bold text-lg">Sophia Clark</h1>
+              <p class="text-sm text-gray-400">Donor &amp; Receiver</p>
+            </div>
+          </div>
+          <nav class="flex flex-col gap-2">
+            <a
+              class="flex items-center gap-3 px-4 py-2 rounded-full bg-[var(--primary-color)] text-gray-900 font-bold"
+              href="#"
+            >
+              <span class="material-symbols-outlined">dashboard</span>
+              <span>Dashboard</span>
+            </a>
+            <a
+              class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">upload</span>
+              <span>Upload Medicine</span>
+            </a>
+            <a
+              class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">pill</span>
+              <span>Available Medicines</span>
+            </a>
+            <a
+              class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">local_shipping</span>
+              <span>Request Tracking</span>
+            </a>
+            <a
+              class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
+              href="#"
+            >
+              <span class="material-symbols-outlined">history</span>
+              <span>Donation History</span>
+            </a>
+          </nav>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a
+            class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
+            href="#"
+          >
+            <span class="material-symbols-outlined">settings</span>
+            <span>Settings</span>
+          </a>
+          <a
+            class="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-800 transition-colors"
+            href="#"
+          >
+            <span class="material-symbols-outlined">logout</span>
+            <span>Logout</span>
+          </a>
+        </div>
+      </aside>
+      <main class="flex-1 p-8">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-3xl font-bold">Welcome back, Sophia!</h1>
+            <p class="text-gray-400">
+              Your actions today can save a life. Let's make a difference.
+            </p>
+          </div>
+          <div class="flex gap-4">
+            <button
+              class="flex items-center gap-2 bg-[var(--primary-color)] text-gray-900 font-bold py-2 px-4 rounded-full hover:bg-opacity-90 transition-opacity"
+            >
+              <span class="material-symbols-outlined">upload</span>
+              <span>Donate Medicine</span>
+            </button>
+            <button
+              class="flex items-center gap-2 bg-gray-800 py-2 px-4 rounded-full hover:bg-gray-700 transition-colors"
+            >
+              <span class="material-symbols-outlined">medication</span>
+              <span>Request Medicine</span>
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="lg:col-span-2">
+            <section
+              class="bg-[#111827] rounded-xl p-8 flex flex-col justify-center items-center text-center shadow-lg"
+            >
+              <div class="mb-4">
+                <span
+                  class="material-symbols-outlined text-6xl text-[var(--primary-color)]"
+                >
+                  volunteer_activism
+                </span>
+              </div>
+              <h2 class="text-2xl font-bold mb-2">Be a Hero Today</h2>
+              <p class="text-gray-400 mb-6 max-w-md">
+                Your surplus medicine could be the miracle someone is praying
+                for. Donate now and bring hope to those in need.
+              </p>
+              <button
+                class="flex items-center gap-2 bg-[var(--primary-color)] text-gray-900 font-bold py-3 px-6 rounded-full hover:bg-opacity-90 transition-opacity text-lg"
+              >
+                <span class="material-symbols-outlined">upload</span>
+                <span>Start a Donation</span>
+              </button>
+            </section>
+            <section class="mt-8">
+              <h2 class="text-2xl font-bold mb-4">Newly Available Medicines</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div
+                  class="bg-[#111827] rounded-xl p-4 flex items-center gap-4"
+                >
+                  <div class="bg-blue-500/20 text-blue-300 p-3 rounded-full">
+                    <span class="material-symbols-outlined">pill</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg">Amoxicillin 500mg</h3>
+                    <p class="text-sm text-gray-400">Antibiotic</p>
+                  </div>
+                  <button
+                    class="ml-auto bg-gray-700 hover:bg-[var(--primary-color)] hover:text-gray-900 text-white font-bold py-2 px-3 rounded-full text-sm transition-colors"
+                  >
+                    Request
+                  </button>
+                </div>
+                <div
+                  class="bg-[#111827] rounded-xl p-4 flex items-center gap-4"
+                >
+                  <div class="bg-red-500/20 text-red-300 p-3 rounded-full">
+                    <span class="material-symbols-outlined">pill</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg">Lisinopril 10mg</h3>
+                    <p class="text-sm text-gray-400">Blood Pressure</p>
+                  </div>
+                  <button
+                    class="ml-auto bg-gray-700 hover:bg-[var(--primary-color)] hover:text-gray-900 text-white font-bold py-2 px-3 rounded-full text-sm transition-colors"
+                  >
+                    Request
+                  </button>
+                </div>
+                <div
+                  class="bg-[#111827] rounded-xl p-4 flex items-center gap-4"
+                >
+                  <div
+                    class="bg-purple-500/20 text-purple-300 p-3 rounded-full"
+                  >
+                    <span class="material-symbols-outlined">pill</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg">Metformin 500mg</h3>
+                    <p class="text-sm text-gray-400">Diabetes</p>
+                  </div>
+                  <button
+                    class="ml-auto bg-gray-700 hover:bg-[var(--primary-color)] hover:text-gray-900 text-white font-bold py-2 px-3 rounded-full text-sm transition-colors"
+                  >
+                    Request
+                  </button>
+                </div>
+                <div
+                  class="bg-[#111827] rounded-xl p-4 flex items-center gap-4"
+                >
+                  <div
+                    class="bg-yellow-500/20 text-yellow-300 p-3 rounded-full"
+                  >
+                    <span class="material-symbols-outlined">pill</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg">Ibuprofen 200mg</h3>
+                    <p class="text-sm text-gray-400">Pain Relief</p>
+                  </div>
+                  <button
+                    class="ml-auto bg-gray-700 hover:bg-[var(--primary-color)] hover:text-gray-900 text-white font-bold py-2 px-3 rounded-full text-sm transition-colors"
+                  >
+                    Request
+                  </button>
+                </div>
+              </div>
+              <div class="text-center mt-6">
+                <a
+                  class="text-[var(--primary-color)] font-semibold hover:underline"
+                  href="#"
+                  >View all available medicines →</a
+                >
+              </div>
+            </section>
+          </div>
+          <div class="lg:col-span-1 space-y-8">
+            <section>
+              <h2 class="text-2xl font-bold mb-4">Your Impact</h2>
+              <div class="bg-[#111827] rounded-xl p-6 space-y-6">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="bg-green-500/20 text-green-300 rounded-full size-12 flex-shrink-0 flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-3xl"
+                      >favorite</span
+                    >
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg">Lives Touched</h3>
+                    <p class="text-2xl font-bold text-[var(--primary-color)]">
+                      12
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div
+                    class="bg-blue-500/20 text-blue-300 rounded-full size-12 flex-shrink-0 flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-3xl"
+                      >verified_user</span
+                    >
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg">Verification Status</h3>
+                    <p class="text-sm font-semibold text-green-400">
+                      KYC Verified
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section>
+              <h2 class="text-2xl font-bold mb-4">Your Badges</h2>
+              <div class="bg-[#111827] rounded-xl p-6 space-y-4">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="bg-blue-500/20 text-blue-300 rounded-full size-10 flex-shrink-0 flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined"
+                      >workspace_premium</span
+                    >
+                  </div>
+                  <div>
+                    <h3 class="font-bold">Top Donor - July 2024</h3>
+                    <p class="text-sm text-gray-400">
+                      Thanks for your generosity!
+                    </p>
+                    <a
+                      class="text-sm text-[var(--primary-color)] font-semibold hover:underline"
+                      href="#"
+                      >View Certificate</a
+                    >
+                  </div>
+                </div>
+                <div class="flex items-start gap-4">
+                  <div
+                    class="bg-yellow-500/20 text-yellow-300 rounded-full size-10 flex-shrink-0 flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined">military_tech</span>
+                  </div>
+                  <div>
+                    <h3 class="font-bold">Community Champion</h3>
+                    <p class="text-sm text-gray-400">For 10+ donations.</p>
+                    <a
+                      class="text-sm text-[var(--primary-color)] font-semibold hover:underline"
+                      href="#"
+                      >View Certificate</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

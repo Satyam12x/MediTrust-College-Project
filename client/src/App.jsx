@@ -5,6 +5,7 @@ import MediTrustHero from './pages/Home'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import Dashboard from './pages/UserDashboard'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<MediTrustHero />} />
         <Route path="/auth" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/user" element={<Dashboard />} />
       </Routes>
     </Router>
   )
