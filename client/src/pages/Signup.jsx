@@ -16,6 +16,7 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import axios from "axios";
+import "../styles/Signup.css";
 
 const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
   const inputRefs = useRef([]);
@@ -102,11 +103,11 @@ const Signup = () => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : type === "number" ? Number(value) : value,
     }));
   };
 
-  const handleNextStep = async () => {
+  const handleNextStep = () => {
     if (step === 1) {
       if (!formData.firstName || !formData.lastName || !formData.age) {
         setError("Please fill in all fields");
@@ -117,10 +118,7 @@ const Signup = () => {
         return;
       }
     } else if (step === 2) {
-      if (
-        !formData.email ||
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-      ) {
+      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         setError("Please enter a valid email address");
         return;
       }
@@ -130,21 +128,6 @@ const Signup = () => {
       }
       if (formData.password !== formData.confirmPassword) {
         setError("Passwords do not match");
-        return;
-      }
-      try {
-        setLoading(true);
-        const response = await axios.post("http://localhost:5000/api/signup", {
-          ...formData,
-          userType: formData.userType,
-          agreeTerms: formData.agreeTerms,
-        });
-        setOtpSent(true);
-        setError("");
-        alert(response.data.message);
-      } catch (err) {
-        setError(err.response?.data?.error || "Failed to send OTP");
-        setLoading(false);
         return;
       }
     }
@@ -160,25 +143,39 @@ const Signup = () => {
   };
 
   const handleVerifyOtp = async () => {
+    if (!formData.userType || !["donor", "patient", "hospital"].includes(formData.userType)) {
+      setError("Please select a valid user type");
+      return;
+    }
+    if (!formData.agreeTerms) {
+      setError("You must agree to the terms");
+      return;
+    }
     if (!otp || !/^\d{6}$/.test(otp)) {
       setError("Please enter a valid 6-digit OTP");
       return;
     }
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:5000/api/otp/verify",
-        {
-          email: formData.email,
-          otp,
-        }
-      );
+      // Send signup request
+      console.log("Signup payload:", formData);
+      const signupResponse = await axios.post("http://localhost:5000/api/signup", formData);
+      setOtpSent(true);
+      setError("");
+      alert(signupResponse.data.message);
+
+      // Verify OTP
+      const otpResponse = await axios.post("http://localhost:5000/api/otp/verify", {
+        email: formData.email,
+        otp,
+      });
       setLoading(false);
-      alert(response.data.message);
-      localStorage.setItem("token", response.data.token);
+      alert(otpResponse.data.message);
+      localStorage.setItem("token", otpResponse.data.token);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.error || "Invalid OTP");
+      setError(err.response?.data?.error || "Failed to sign up or verify OTP");
+      console.error("Error details:", err.response?.data?.details);
       setLoading(false);
     }
   };
@@ -285,24 +282,21 @@ const Signup = () => {
               />
             </div>
             {steps.map((stepName, index) => (
-              <div
+              <><div
                 key={index}
                 className="flex flex-col items-center relative z-10"
               >
                 <motion.div
                   whileHover={{ scale: 1.1 }}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold relative ${
-                    index < step
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold relative ${index < step
                       ? "bg-[#4B4A8C]"
                       : index === step - 1
-                      ? "bg-[#19183B]"
-                      : "bg-[#E6E6FA]"
-                  }`}
+                        ? "bg-[#19183B]"
+                        : "bg-[#E6E6FA]"}`}
                   animate={{
-                    boxShadow:
-                      index === step - 1
-                        ? "0 4px 15px rgba(25, 24, 59, 0.3)"
-                        : "none",
+                    boxShadow: index === step - 1
+                      ? "0 4px 15px rgba(25, 24, 59, 0.3)"
+                      : "none",
                   }}
                   transition={{ duration: 0.3 }}
                 >
@@ -315,13 +309,11 @@ const Signup = () => {
                     <motion.div
                       className="absolute inset-0 rounded-full border-2 border-[#4B4A8C]"
                       animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
+                      transition={{ duration: 1.5, repeat: Infinity }} />
                   )}
-                </motion.div>
-                <span className="text-xs text-[#6B7280] mt-2 font-medium">
+                </div><span className="text-xs text-[#6B7280] mt-2 font-medium">
                   {stepName}
-                </span>
+                </span></>
               </div>
             ))}
           </motion.div>
@@ -361,6 +353,7 @@ const Signup = () => {
                       whileFocus={{ scale: 1.03 }}
                       className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="First Name"
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -387,6 +380,7 @@ const Signup = () => {
                       whileFocus={{ scale: 1.03 }}
                       className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Last Name"
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -411,6 +405,8 @@ const Signup = () => {
                       whileFocus={{ scale: 1.03 }}
                       className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Age"
+                      required
+                      min="18"
                     />
                   </div>
                   <motion.button
@@ -463,6 +459,7 @@ const Signup = () => {
                       whileFocus={{ scale: 1.03 }}
                       className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Email Address"
+                      required
                     />
                   </div>
                   <div className="relative">
@@ -489,6 +486,8 @@ const Signup = () => {
                       whileFocus={{ scale: 1.03 }}
                       className="w-full pl-12 pr-12 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Password"
+                      required
+                      minLength="6"
                     />
                     <motion.button
                       type="button"
@@ -525,6 +524,8 @@ const Signup = () => {
                       whileFocus={{ scale: 1.03 }}
                       className="w-full pl-12 pr-12 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Confirm Password"
+                      required
+                      minLength="6"
                     />
                     <motion.button
                       type="button"
@@ -561,25 +562,10 @@ const Signup = () => {
                       disabled={loading}
                       className="flex-1 py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
                     >
-                      {loading ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                          className="flex items-center gap-2"
-                        >
-                          <FaSpinner />
-                          Sending...
-                        </motion.div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <FaLock className="group-hover:scale-110 transition-transform duration-300" />
-                          Next & Send OTP
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <FaLock className="group-hover:scale-110 transition-transform duration-300" />
+                        Next
+                      </div>
                     </motion.button>
                   </div>
                 </motion.div>
@@ -662,7 +648,7 @@ const Signup = () => {
                       onChange={handleInputChange}
                       whileHover={{ scale: 1.05 }}
                       className="h-5 w-5 text-[#19183B] border-[#E6E6FA] rounded focus:ring-[#4B4A8C]/50 transition-all duration-300"
-                      whileFocus={{ scale: 1.05 }}
+                      required
                     />
                     <label className="text-sm text-[#6B7280] leading-relaxed">
                       I agree to the{" "}
@@ -790,28 +776,6 @@ const Signup = () => {
           </motion.div>
         </div>
       </motion.div>
-
-      <style jsx>{`
-        input:focus {
-          box-shadow: 0 0 0 3px rgba(75, 74, 140, 0.2);
-        }
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-        @media (max-width: 640px) {
-          .grid-cols-3 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-      `}</style>
     </div>
   );
 };
