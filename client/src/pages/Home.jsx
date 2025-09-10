@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Footer from "../components/Footer";
 
-// Enhanced Navbar with mobile menu and smooth animations
+// Enhanced Navbar with hover effects
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,20 +37,23 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
         isScrolled
-          ? "bg-white/95 backdrop-blur-xl shadow-xl border-b border-[#1C352D]/20"
+          ? "bg-[#F8F9FA]/95 backdrop-blur-xl shadow-sm border-b border-gray-200"
           : "bg-transparent shadow-none"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <div className="flex items-center space-x-4 cursor-pointer">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#1C352D] to-[#2E4F3F] rounded-xl flex items-center justify-center shadow-md transition-all duration-300">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center space-x-4 cursor-pointer"
+          >
+            <div className="w-10 h-10 bg-[#19183B] rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 hover:shadow-[#19183B]/30">
               <span className="text-white text-xl font-bold">M</span>
             </div>
-            <span className="text-2xl font-bold text-[#1C352D] transition-colors duration-300">
+            <span className="text-2xl font-bold text-[#19183B] transition-colors duration-300 hover:text-[#4B4A8C]">
               MediTrust
             </span>
-          </div>
+          </motion.div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
@@ -59,13 +62,13 @@ const Navbar = () => {
                 <button
                   key={id}
                   onClick={() => scrollToSection(id)}
-                  className="text-[#1C352D] hover:text-[#2E4F3F] transition-all duration-300 font-medium text-base lg:text-lg relative"
+                  className="text-[#19183B] hover:text-[#4B4A8C] transition-all duration-300 font-medium text-base lg:text-lg relative group"
                 >
                   {id
                     .split("-")
                     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(" ")}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#1C352D] transition-all duration-300 hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#4B4A8C] transition-all duration-200 group-hover:w-full"></span>
                 </button>
               )
             )}
@@ -74,18 +77,22 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={handleLoginClick}
-              className="px-4 py-2 sm:px-6 sm:py-3 text-[#1C352D] hover:text-[#2E4F3F] transition-all duration-300 font-medium text-base lg:text-lg"
+              className="px-4 py-2 sm:px-6 sm:py-3 text-[#19183B] hover:text-[#4B4A8C] transition-all duration-300 font-medium text-base lg:text-lg"
             >
               Login
             </button>
             <motion.button
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSignUpClick}
-              className="px-4 py-2 sm:px-8 sm:py-3 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-[#1C352D]/30 font-medium flex items-center space-x-2 text-base lg:text-lg"
+              className="px-4 py-2 sm:px-8 sm:py-3 bg-[#19183B] text-white rounded-xl transition-all duration-300 font-medium flex items-center space-x-2 text-base lg:text-lg hover:bg-[#4B4A8C]"
             >
               <span>Sign Up</span>
               <svg
-                className="w-4 h-4 transition-transform duration-300"
+                className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -105,7 +112,7 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               <svg
-                className="w-6 h-6 text-[#1C352D] transition-colors duration-300"
+                className="w-6 h-6 text-[#19183B] transition-colors duration-300 hover:text-[#4B4A8C]"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -127,14 +134,14 @@ const Navbar = () => {
             isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <div className="bg-white/95 backdrop-blur-md border-t border-[#1C352D]/20 py-4">
+          <div className="bg-[#F8F9FA]/95 backdrop-blur-md border-t border-gray-200 py-4">
             <div className="space-y-4 px-4">
               {["how-it-works", "features", "impact", "testimonials"].map(
                 (id) => (
                   <button
                     key={id}
                     onClick={() => scrollToSection(id)}
-                    className="block w-full text-left py-3 text-[#1C352D] hover:text-[#2E4F3F] hover:bg-[#F0F7F6] rounded-lg transition-all duration-300 px-4"
+                    className="block w-full text-left py-3 text-[#19183B] hover:text-[#4B4A8C] hover:bg-gray-200 rounded-lg transition-all duration-300 px-4"
                   >
                     {id
                       .split("-")
@@ -153,7 +160,7 @@ const Navbar = () => {
   );
 };
 
-// Enhanced Hero Section with wave background and subtle animations
+// Hero Section with gradients and hover effects
 const HeroSection = () => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
@@ -167,20 +174,13 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-[#F8FBFA]">
-      {/* Wave background */}
-      <div className="absolute inset-0 z-0">
-        <svg
-          className="w-full h-full opacity-10"
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="#1C352D"
-            fillOpacity="0.3"
-            d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          ></path>
-        </svg>
+    <section className="relative min-h-screen w-full flex items-center overflow-hidden bg-[#F8F9FA]">
+      {/* Corner gradients */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
+      </div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
       </div>
 
       {/* Main content */}
@@ -195,29 +195,37 @@ const HeroSection = () => {
           className="space-y-8"
         >
           <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#1C352D] leading-tight tracking-tight"
-            style={{ textShadow: "0 0 15px rgba(28, 53, 45, 0.3)" }}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#2D2D2D] leading-tight tracking-tight"
+            style={{ textShadow: "0 0 10px rgba(25, 24, 59, 0.2)" }}
           >
             Empower Healthcare
-            <span className="block bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-[#19183B] to-[#4B4A8C] bg-clip-text text-transparent">
               Through Trusted Donations
             </span>
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-[#6B7280] max-w-3xl mx-auto leading-relaxed">
             Seamlessly connect donors, hospitals, and patients to save lives
             with transparency and efficiency.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
             <motion.button
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
               onClick={handleDonateClick}
-              className="relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-500 hover:shadow-[0_0_20px_rgba(28,53,45,0.5)]"
+              className="relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-[#19183B] px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-white transition-all duration-300 hover:bg-[#4B4A8C]"
             >
               <span className="relative">Donate Now</span>
             </motion.button>
             <motion.button
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+              }}
               whileTap={{ scale: 0.98 }}
-              className="relative inline-flex items-center justify-center rounded-xl border-2 border-[#1C352D] bg-transparent px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-[#1C352D] transition-all duration-500 hover:bg-[#1C352D] hover:text-white"
+              className="relative inline-flex items-center justify-center rounded-xl border-2 border-[#19183B] bg-transparent px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-bold text-[#19183B] transition-all duration-300 hover:bg-[#19183B] hover:text-white"
             >
               <span className="relative">Request Help</span>
             </motion.button>
@@ -239,17 +247,21 @@ const HeroSection = () => {
             { value: "567", label: "Lives Impacted" },
             { value: "25%", label: "Waste Reduced" },
           ].map((stat, index) => (
-            <div
+            <motion.div
               key={index}
-              className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-[#1C352D]/20 shadow-md transition-all duration-500"
+              whileHover={{
+                scale: 1.03,
+                boxShadow: "0 4px 20px rgba(25, 24, 59, 0.1)",
+              }}
+              className="bg-[#E6E6FA]/50 rounded-xl p-4 sm:p-6 border border-gray-200 shadow-sm transition-all duration-300 hover:border-[#4B4A8C]"
             >
-              <p className="text-3xl sm:text-4xl font-bold text-[#1C352D]">
+              <p className="text-3xl sm:text-4xl font-bold text-[#19183B]">
                 {stat.value}
               </p>
-              <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wider mt-2">
+              <p className="text-xs sm:text-sm font-medium text-[#6B7280] uppercase tracking-wider mt-2">
                 {stat.label}
               </p>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </div>
@@ -257,7 +269,7 @@ const HeroSection = () => {
   );
 };
 
-// Re-designed How It Works Section with circular progress layout
+// How It Works Section with gradients and hover effects
 const HowItWorksSection = () => {
   const [activeStep, setActiveStep] = useState(0);
 
@@ -271,7 +283,7 @@ const HowItWorksSection = () => {
         "Complete a quick and secure verification process to ensure trust and safety.",
       icon: (
         <svg
-          className="w-10 h-10 text-white"
+          className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -293,7 +305,7 @@ const HowItWorksSection = () => {
         "Your contributions are securely processed to reach hospitals and patients efficiently.",
       icon: (
         <svg
-          className="w-10 h-10 text-white"
+          className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -315,7 +327,7 @@ const HowItWorksSection = () => {
         "Access detailed reports and live updates on the impact of your contributions.",
       icon: (
         <svg
-          className="w-10 h-10 text-white"
+          className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -334,28 +346,23 @@ const HowItWorksSection = () => {
   return (
     <section
       id="how-it-works"
-      className="py-32 bg-[#F8FBFA] relative overflow-hidden"
+      className="py-32 bg-[#F8F9FA] relative overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-10">
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="#1C352D"
-            fillOpacity="0.3"
-            d="M0,160L48,144C96,128,192,96,288,112C384,128,480,192,576,192C672,192,768,128,864,112C960,96,1056,128,1152,144C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          ></path>
-        </svg>
+      {/* Corner gradients */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
       </div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
+      </div>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#1C352D] mb-6">
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#2D2D2D] mb-6">
             How MediTrust Works
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
-          <p className="text-xl sm:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <div className="w-32 h-1 bg-[#19183B] rounded-full mx-auto mb-6"></div>
+          <p className="text-xl sm:text-2xl text-[#6B7280] max-w-4xl mx-auto leading-relaxed">
             A simple, secure process to connect donors with those in need.
           </p>
         </div>
@@ -365,30 +372,29 @@ const HowItWorksSection = () => {
             <motion.div
               key={index}
               onClick={() => setActiveStep(index)}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.2 }}
-              className={`relative bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-[#1C352D]/20 transition-all duration-500 cursor-pointer ${
-                activeStep === index ? "scale-105" : ""
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 4px 20px rgba(25, 24, 59, 0.1)",
+              }}
+              className={`relative bg-gray-100 rounded-3xl p-6 shadow-sm border border-gray-200 transition-all duration-300 cursor-pointer group ${
+                activeStep === index ? "scale-105 border-[#4B4A8C]" : ""
               }`}
             >
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full flex items-center justify-center text-white font-bold">
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#19183B] rounded-full flex items-center justify-center text-white font-bold">
                 {step.number}
               </div>
               <div className="flex flex-col items-center text-center mt-8">
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-md transition-all duration-500 ${
-                    activeStep === index
-                      ? "bg-gradient-to-r from-[#1C352D] to-[#2E4F3F]"
-                      : "bg-[#1C352D]/50"
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 ${
+                    activeStep === index ? "bg-[#19183B]" : "bg-[#19183B]/50"
                   }`}
                 >
                   {step.icon}
                 </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-[#1C352D] mt-4">
+                <h3 className="text-xl sm:text-2xl font-semibold text-[#2D2D2D] mt-4">
                   {step.title}
                 </h3>
-                <p className="text-base text-gray-600 mt-2">
+                <p className="text-base text-[#6B7280] mt-2">
                   {step.description}
                 </p>
                 <motion.div
@@ -398,7 +404,7 @@ const HowItWorksSection = () => {
                     opacity: activeStep === index ? 1 : 0,
                   }}
                   transition={{ duration: 0.5 }}
-                  className="text-sm text-gray-500 mt-4"
+                  className="text-sm text-[#6B7280] mt-4"
                 >
                   {step.details}
                 </motion.div>
@@ -411,7 +417,7 @@ const HowItWorksSection = () => {
   );
 };
 
-// Enhanced Features Section with minimalistic cards
+// Features Section with gradients and hover effects
 const FeaturesSection = () => {
   const features = [
     {
@@ -422,7 +428,7 @@ const FeaturesSection = () => {
         "Every donation is processed securely, ensuring trust and transparency.",
       icon: (
         <svg
-          className="w-12 h-12"
+          className="w-12 h-12 group-hover:rotate-12 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -443,7 +449,7 @@ const FeaturesSection = () => {
         "Get instant updates and visualizations on how your donations are used.",
       icon: (
         <svg
-          className="w-12 h-12"
+          className="w-12 h-12 group-hover:rotate-12 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -463,7 +469,7 @@ const FeaturesSection = () => {
       details: "Our algorithms optimize distribution for maximum impact.",
       icon: (
         <svg
-          className="w-12 h-12"
+          className="w-12 h-12 group-hover:rotate-12 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -483,7 +489,7 @@ const FeaturesSection = () => {
       details: "Support healthcare needs worldwide with seamless integration.",
       icon: (
         <svg
-          className="w-12 h-12"
+          className="w-12 h-12 group-hover:rotate-12 transition-transform duration-300"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -500,15 +506,22 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <section id="features" className="py-32 bg-white relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#F8FBFA]/50 to-transparent pointer-events-none"></div>
+    <section id="features" className="py-32 bg-gray-100 relative">
+      {/* Corner gradients */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
+      </div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-[#1C352D] mb-6">
+          <h2 className="text-5xl font-bold text-[#2D2D2D] mb-6">
             Why Choose MediTrust
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
-          <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <div className="w-32 h-1 bg-[#19183B] rounded-full mx-auto mb-6"></div>
+          <p className="text-2xl text-[#6B7280] max-w-4xl mx-auto leading-relaxed">
             Tools designed to make your donations count.
           </p>
         </div>
@@ -520,16 +533,22 @@ const FeaturesSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
-              className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-[#1C352D]/20 transition-all duration-500"
+              whileHover={{
+                scale: 1.03,
+                boxShadow: "0 4px 20px rgba(25, 24, 59, 0.1)",
+              }}
+              className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 transition-all duration-300 group hover:border-[#4B4A8C]"
             >
-              <div className="w-16 h-16 mx-auto bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-2xl flex items-center justify-center mb-6 shadow-md">
+              <div className="w-16 h-16 mx-auto bg-[#19183B] rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-semibold text-[#1C352D] mb-4 text-center">
+              <h3 className="text-xl font-semibold text-[#2D2D2D] mb-4 text-center">
                 {feature.title}
               </h3>
-              <p className="text-gray-600 text-center">{feature.description}</p>
-              <p className="text-sm text-gray-500 mt-4 text-center">
+              <p className="text-[#6B7280] text-center">
+                {feature.description}
+              </p>
+              <p className="text-sm text-[#6B7280] mt-4 text-center">
                 {feature.details}
               </p>
             </motion.div>
@@ -540,7 +559,7 @@ const FeaturesSection = () => {
   );
 };
 
-// Enhanced Impact Section with counter animations
+// Impact Section with gradients and hover effects
 const ImpactSection = () => {
   const stats = [
     { value: 10000, label: "Donors Connected", icon: "👥", suffix: "+" },
@@ -596,28 +615,23 @@ const ImpactSection = () => {
     <section
       id="impact"
       ref={sectionRef}
-      className="py-32 bg-[#F8FBFA] relative overflow-hidden"
+      className="py-32 bg-[#F8F9FA] relative overflow-hidden"
     >
-      <div className="absolute inset-0 opacity-10">
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 1440 320"
-          preserveAspectRatio="none"
-        >
-          <path
-            fill="#1C352D"
-            fillOpacity="0.3"
-            d="M0,192L48,176C96,160,192,128,288,128C384,128,480,160,576,176C672,192,768,192,864,176C960,160,1056,128,1152,128C1248,128,1344,160,1392,176L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          ></path>
-        </svg>
+      {/* Corner gradients */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
       </div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-[#1C352D] mb-6">
+          <h2 className="text-5xl font-bold text-[#2D2D2D] mb-6">
             Our Global Impact
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
-          <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <div className="w-32 h-1 bg-[#19183B] rounded-full mx-auto mb-6"></div>
+          <p className="text-2xl text-[#6B7280] max-w-4xl mx-auto leading-relaxed">
             Making a difference, one donation at a time.
           </p>
         </div>
@@ -629,16 +643,20 @@ const ImpactSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 20 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0 4px 20px rgba(25, 24, 59, 0.1)",
+              }}
               className="text-center relative"
             >
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-3xl mb-8 shadow-lg">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-[#19183B] text-white rounded-3xl mb-8 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
                 <span className="text-4xl">{stat.icon}</span>
               </div>
-              <h3 className="text-6xl font-bold text-[#1C352D] mb-4">
+              <h3 className="text-6xl font-bold text-[#19183B] mb-4">
                 {Math.round(counters[index]).toLocaleString()}
                 {stat.suffix}
               </h3>
-              <p className="text-xl text-gray-600 font-medium">{stat.label}</p>
+              <p className="text-xl text-[#6B7280] font-medium">{stat.label}</p>
             </motion.div>
           ))}
         </div>
@@ -647,7 +665,7 @@ const ImpactSection = () => {
   );
 };
 
-// Enhanced Testimonials Section with carousel-like cards
+// Testimonials Section with gradients and hover effects
 const TestimonialsSection = () => {
   const testimonials = [
     {
@@ -672,15 +690,22 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section id="testimonials" className="py-32 bg-white relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#F8FBFA]/50 to-transparent pointer-events-none"></div>
+    <section id="testimonials" className="py-32 bg-gray-100 relative">
+      {/* Corner gradients */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
+      </div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold text-[#1C352D] mb-6">
+          <h2 className="text-5xl font-bold text-[#2D2D2D] mb-6">
             What Our Community Says
           </h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full mx-auto mb-6"></div>
-          <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <div className="w-32 h-1 bg-[#19183B] rounded-full mx-auto mb-6"></div>
+          <p className="text-2xl text-[#6B7280] max-w-4xl mx-auto leading-relaxed">
             Hear from those making a difference with MediTrust.
           </p>
         </div>
@@ -692,23 +717,23 @@ const TestimonialsSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.2 }}
-              className="bg-white/90 backdrop-blur-sm rounded-3xl p-10 shadow-lg border border-[#1C352D]/20 transition-all duration-500"
+              whileHover={{
+                scale: 1.03,
+                boxShadow: "0 4px 20px rgba(25, 24, 59, 0.1)",
+              }}
+              className="bg-white rounded-3xl p-10 shadow-sm border border-gray-200 transition-all duration-300 hover:border-[#4B4A8C]"
             >
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-2xl mb-8 shadow-md">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-[#19183B] text-white rounded-2xl mb-8 shadow-sm">
                 <span className="text-3xl font-bold">{testimonial.avatar}</span>
               </div>
-              <p className="text-gray-700 italic mb-8 text-lg leading-relaxed">
+              <p className="text-[#6B7280] italic mb-8 text-lg leading-relaxed">
                 "{testimonial.quote}"
               </p>
-              <div className="border-t border-[#1C352D]/20 pt-6">
-                <h4
-                  class
-                  squarely
-                  className="font-semibold text-xl text-[#1C352D]"
-                >
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="font-semibold text-xl text-[#2D2D2D]">
                   {testimonial.author}
                 </h4>
-                <p className="text-base text-gray-600">{testimonial.role}</p>
+                <p className="text-base text-[#6B7280]">{testimonial.role}</p>
               </div>
             </motion.div>
           ))}
