@@ -103,7 +103,7 @@ const Dashboard = () => {
     const timer = setTimeout(() => {
       setIsLoading(false);
       setStats({
-        totalDonations: 45,
+        totalDonations: 0,
         totalRequests: 12,
         completedTransactions: 38,
         activeRequests: 7,

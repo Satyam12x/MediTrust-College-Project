@@ -62,12 +62,13 @@ const OtpInput = ({ otp, setOtp, otpFocused, setOtpFocused }) => {
             onFocus={() => setOtpFocused(index)}
             onBlur={() => setOtpFocused(null)}
             whileFocus={{ scale: 1.05 }}
-            className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1C352D]/50 transition-all duration-300 bg-white/80 backdrop-blur-sm ${
+            whileHover={{ boxShadow: "0 0 10px rgba(25, 24, 59, 0.2)" }}
+            className={`w-12 h-12 text-center text-xl font-semibold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 bg-[#F8F9FA]/80 backdrop-blur-sm hover:border-[#4B4A8C] ${
               otpFocused === index
-                ? "border-[#1C352D] shadow-lg bg-white"
+                ? "border-[#19183B] shadow-lg bg-[#F8F9FA]"
                 : otp[index]
-                ? "border-green-500 bg-green-50"
-                : "border-gray-300"
+                ? "border-[#4B4A8C] bg-[#E6E6FA]/50"
+                : "border-[#E6E6FA]"
             }`}
             aria-label={`OTP digit ${index + 1}`}
           />
@@ -192,24 +193,39 @@ const Signup = () => {
 
   const labelVariants = {
     resting: { y: 0, scale: 1, color: "#6B7280" },
-    floating: { y: -24, scale: 0.85, color: "#1C352D" },
+    floating: { y: -24, scale: 0.85, color: "#19183B" },
   };
 
   const steps = ["Personal Details", "Credentials", "Verification"];
   const progress = ((step - 1) / (steps.length - 1)) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8FBFA] via-white to-[#F0F7F6] flex items-center justify-center px-4 relative overflow-hidden font-sans">
+    <div
+      className="min-h-screen bg-[#F8F9FA] flex items-center justify-center px-4 relative overflow-hidden"
+      style={{ fontFamily: '"Space Grotesk", "Noto Sans", sans-serif' }}
+    >
+      {/* Corner gradients */}
+      <div className="absolute top-0 left-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-br from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-[60%_40%_30%_70%] -translate-x-1/2 -translate-y-1/2 blur-3xl opacity-20"></div>
+      </div>
+      <div className="absolute bottom-0 right-0 w-64 h-64 pointer-events-none">
+        <div className="absolute w-96 h-96 bg-gradient-to-tl from-[#19183B]/30 via-[#4B4A8C]/20 to-[#E6E6FA]/10 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl opacity-20"></div>
+      </div>
+
       {/* Back to Home Button */}
       <motion.button
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
+        whileHover={{
+          scale: 1.05,
+          boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+        }}
         whileTap={{ scale: 0.95 }}
         onClick={() => navigate("/")}
-        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border border-[#1C352D]/20 text-[#1C352D] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base"
+        className="fixed top-4 left-4 z-20 flex items-center gap-1 px-3 py-1.5 bg-[#F8F9FA]/80 backdrop-blur-sm rounded-full border border-[#19183B]/20 text-[#2D2D2D] text-sm transition-all duration-300 shadow-md sm:px-4 sm:py-2 sm:text-base hover:bg-[#E6E6FA]"
       >
-        <FaArrowLeft />
+        <FaArrowLeft className="group-hover:scale-110 transition-transform duration-300" />
         <span className="font-medium hidden sm:inline">Home</span>
       </motion.button>
 
@@ -221,9 +237,9 @@ const Signup = () => {
         style={{ perspective: "1000px" }}
         className="w-full max-w-md mx-4 relative z-10"
       >
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 relative overflow-hidden">
+        <div className="bg-[#F8F9FA]/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#E6E6FA]/20 p-8 relative overflow-hidden">
           {/* Gradient overlay */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F]"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#19183B] to-[#4B4A8C]"></div>
 
           {/* Logo */}
           <motion.div
@@ -233,13 +249,19 @@ const Signup = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
           >
             <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#1C352D] to-[#2E4F3F] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl">
-                <FaLock />
-              </div>
+              <motion.div
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                }}
+                className="w-16 h-16 bg-gradient-to-br from-[#19183B] to-[#4B4A8C] rounded-2xl flex items-center justify-center text-white text-2xl shadow-xl"
+              >
+                <FaLock className="group-hover:rotate-12 transition-transform duration-300" />
+              </motion.div>
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center"
+                className="absolute -top-1 -right-1 w-5 h-5 bg-[#4B4A8C] rounded-full flex items-center justify-center"
               >
                 <FaLock className="text-white text-xs" />
               </motion.div>
@@ -253,10 +275,10 @@ const Signup = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="text-center mb-6"
           >
-            <h2 className="text-3xl font-bold text-[#1C352D] mb-2">
+            <h2 className="text-3xl font-bold text-[#2D2D2D] mb-2">
               Join MediTrust
             </h2>
-            <p className="text-gray-600">Create your secure account</p>
+            <p className="text-[#6B7280]">Create your secure account</p>
           </motion.div>
 
           {/* Progress Indicator */}
@@ -266,9 +288,9 @@ const Signup = () => {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="flex justify-between mb-8 relative"
           >
-            <div className="absolute top-4 left-0 w-full h-0.5 bg-gray-200 rounded-full">
+            <div className="absolute top-4 left-0 w-full h-0.5 bg-[#E6E6FA] rounded-full">
               <motion.div
-                className="h-full bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] rounded-full"
+                className="h-full bg-gradient-to-r from-[#19183B] to-[#4B4A8C] rounded-full"
                 initial={{ width: "0%" }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
@@ -280,18 +302,18 @@ const Signup = () => {
                 className="flex flex-col items-center relative z-10"
               >
                 <motion.div
+                  whileHover={{ scale: 1.1 }}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold relative ${
                     index < step
-                      ? "bg-green-500"
+                      ? "bg-[#4B4A8C]"
                       : index === step - 1
-                      ? "bg-[#1C352D]"
-                      : "bg-gray-300"
+                      ? "bg-[#19183B]"
+                      : "bg-[#E6E6FA]"
                   }`}
                   animate={{
-                    scale: index === step - 1 ? 1.1 : 1,
                     boxShadow:
                       index === step - 1
-                        ? "0 4px 15px rgba(28, 53, 45, 0.3)"
+                        ? "0 4px 15px rgba(25, 24, 59, 0.3)"
                         : "none",
                   }}
                   transition={{ duration: 0.3 }}
@@ -303,13 +325,13 @@ const Signup = () => {
                   )}
                   {index === step - 1 && (
                     <motion.div
-                      className="absolute inset-0 rounded-full border-2 border-[#1C352D]"
+                      className="absolute inset-0 rounded-full border-2 border-[#4B4A8C]"
                       animate={{ scale: [1, 1.3, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                     />
                   )}
                 </motion.div>
-                <span className="text-xs text-gray-600 mt-2 font-medium">
+                <span className="text-xs text-[#6B7280] mt-2 font-medium">
                   {stepName}
                 </span>
               </div>
@@ -330,15 +352,15 @@ const Signup = () => {
                 >
                   <div className="relative">
                     <motion.div
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
                       animate={{
-                        color: formData.firstName ? "#1C352D" : "#9CA3AF",
+                        color: formData.firstName ? "#19183B" : "#6B7280",
                       }}
                     >
-                      <FaUser />
+                      <FaUser className="group-hover:scale-110 transition-transform duration-300" />
                     </motion.div>
                     <motion.label
-                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none transition-all duration-300"
+                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
                       animate={formData.firstName ? "floating" : "resting"}
                       variants={labelVariants}
                     >
@@ -349,22 +371,22 @@ const Signup = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
+                      whileFocus={{ scale: 1.03 }}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="First Name"
                     />
                   </div>
                   <div className="relative">
                     <motion.div
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
                       animate={{
-                        color: formData.lastName ? "#1C352D" : "#9CA3AF",
+                        color: formData.lastName ? "#19183B" : "#6B7280",
                       }}
                     >
-                      <FaUser />
+                      <FaUser className="group-hover:scale-110 transition-transform duration-300" />
                     </motion.div>
                     <motion.label
-                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none transition-all duration-300"
+                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
                       animate={formData.lastName ? "floating" : "resting"}
                       variants={labelVariants}
                     >
@@ -375,20 +397,20 @@ const Signup = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
+                      whileFocus={{ scale: 1.03 }}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Last Name"
                     />
                   </div>
                   <div className="relative">
                     <motion.div
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                      animate={{ color: formData.age ? "#1C352D" : "#9CA3AF" }}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
+                      animate={{ color: formData.age ? "#19183B" : "#6B7280" }}
                     >
-                      <FaUser />
+                      <FaUser className="group-hover:scale-110 transition-transform duration-300" />
                     </motion.div>
                     <motion.label
-                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none transition-all duration-300"
+                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
                       animate={formData.age ? "floating" : "resting"}
                       variants={labelVariants}
                     >
@@ -399,19 +421,23 @@ const Signup = () => {
                       name="age"
                       value={formData.age}
                       onChange={handleInputChange}
-                      whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
+                      whileFocus={{ scale: 1.03 }}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Age"
                     />
                   </div>
                   <motion.button
+                    whileHover={{
+                      scale: 1.05,
+                      boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                    }}
                     whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={handleNextStep}
-                    className="w-full py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300"
+                    className="w-full py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 hover:bg-[#4B4A8C]"
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <FaLock />
+                      <FaLock className="group-hover:scale-110 transition-transform duration-300" />
                       Next
                     </div>
                   </motion.button>
@@ -428,15 +454,15 @@ const Signup = () => {
                 >
                   <div className="relative">
                     <motion.div
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
                       animate={{
-                        color: formData.email ? "#1C352D" : "#9CA3AF",
+                        color: formData.email ? "#19183B" : "#6B7280",
                       }}
                     >
-                      <FaEnvelope />
+                      <FaEnvelope className="group-hover:scale-110 transition-transform duration-300" />
                     </motion.div>
                     <motion.label
-                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none transition-all duration-300"
+                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
                       animate={formData.email ? "floating" : "resting"}
                       variants={labelVariants}
                     >
@@ -447,22 +473,22 @@ const Signup = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
+                      whileFocus={{ scale: 1.03 }}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Email Address"
                     />
                   </div>
                   <div className="relative">
                     <motion.div
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
                       animate={{
-                        color: formData.password ? "#1C352D" : "#9CA3AF",
+                        color: formData.password ? "#19183B" : "#6B7280",
                       }}
                     >
-                      <FaLock />
+                      <FaLock className="group-hover:scale-110 transition-transform duration-300" />
                     </motion.div>
                     <motion.label
-                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none transition-all duration-300"
+                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
                       animate={formData.password ? "floating" : "resting"}
                       variants={labelVariants}
                     >
@@ -473,29 +499,30 @@ const Signup = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
+                      whileFocus={{ scale: 1.03 }}
+                      className="w-full pl-12 pr-12 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Password"
                     />
-                    <button
+                    <motion.button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1C352D] transition-colors duration-300"
+                      whileHover={{ scale: 1.1 }}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#6B7280] hover:text-[#4B4A8C] transition-colors duration-300"
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
+                    </motion.button>
                   </div>
                   <div className="relative">
                     <motion.div
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6B7280]"
                       animate={{
-                        color: formData.confirmPassword ? "#1C352D" : "#9CA3AF",
+                        color: formData.confirmPassword ? "#19183B" : "#6B7280",
                       }}
                     >
-                      <FaLock />
+                      <FaLock className="group-hover:scale-110 transition-transform duration-300" />
                     </motion.div>
                     <motion.label
-                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none transition-all duration-300"
+                      className="absolute left-12 top-1/2 transform -translate-y-1/2 text-[#6B7280] font-medium pointer-events-none transition-all duration-300"
                       animate={
                         formData.confirmPassword ? "floating" : "resting"
                       }
@@ -508,35 +535,44 @@ const Signup = () => {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      whileFocus={{ scale: 1.02 }}
-                      className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl text-gray-900 bg-gray-50/50 focus:outline-none focus:border-[#1C352D] focus:ring-2 focus:ring-[#1C352D]/20 transition-all duration-300"
+                      whileFocus={{ scale: 1.03 }}
+                      className="w-full pl-12 pr-12 py-4 border-2 border-[#E6E6FA] rounded-xl text-[#2D2D2D] bg-[#F8F9FA]/50 focus:outline-none focus:border-[#4B4A8C] focus:ring-2 focus:ring-[#4B4A8C]/30 transition-all duration-300 hover:border-[#4B4A8C] group"
                       aria-label="Confirm Password"
                     />
-                    <button
+                    <motion.button
                       type="button"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#1C352D] transition-colors duration-300"
+                      whileHover={{ scale: 1.1 }}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#6B7280] hover:text-[#4B4A8C] transition-colors duration-300"
                     >
                       {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
+                    </motion.button>
                   </div>
                   <div className="flex space-x-4">
                     <motion.button
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                      }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={handlePrevStep}
-                      className="flex-1 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all duration-300"
+                      className="flex-1 py-4 bg-[#E6E6FA] text-[#2D2D2D] rounded-xl font-semibold transition-all duration-300 hover:bg-[#4B4A8C] hover:text-white"
                     >
                       Back
                     </motion.button>
                     <motion.button
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                      }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={handleNextStep}
                       disabled={loading}
-                      className="flex-1 py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                      className="flex-1 py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
                     >
                       {loading ? (
                         <motion.div
@@ -553,7 +589,7 @@ const Signup = () => {
                         </motion.div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <FaEnvelope />
+                          <FaEnvelope className="group-hover:scale-110 transition-transform duration-300" />
                           Next & Send OTP
                         </div>
                       )}
@@ -571,7 +607,7 @@ const Signup = () => {
                   className="space-y-6"
                 >
                   <div className="space-y-4">
-                    <label className="block text-center text-gray-700 font-medium text-sm">
+                    <label className="block text-center text-[#2D2D2D] font-medium text-sm">
                       Enter Verification Code
                     </label>
                     <OtpInput
@@ -582,7 +618,7 @@ const Signup = () => {
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="block text-center text-gray-700 font-medium text-sm">
+                    <label className="block text-center text-[#2D2D2D] font-medium text-sm">
                       I am a
                     </label>
                     <div className="grid grid-cols-3 gap-3">
@@ -603,12 +639,16 @@ const Signup = () => {
                           icon: FaUserInjured,
                         },
                       ].map((type) => (
-                        <label
+                        <motion.label
                           key={type.value}
-                          className={`flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                          whileHover={{
+                            scale: 1.05,
+                            boxShadow: "0 0 10px rgba(25, 24, 59, 0.2)",
+                          }}
+                          className={`flex flex-col items-center p-3 border-2 rounded-xl cursor-pointer transition-all duration-300 group ${
                             formData.userType === type.value
-                              ? "border-[#1C352D] bg-gray-50"
-                              : "border-gray-200"
+                              ? "border-[#19183B] bg-[#E6E6FA]/50"
+                              : "border-[#E6E6FA] hover:border-[#4B4A8C]"
                           }`}
                         >
                           <input
@@ -619,11 +659,11 @@ const Signup = () => {
                             onChange={handleInputChange}
                             className="sr-only"
                           />
-                          <type.icon className="text-2xl mb-1 text-[#1C352D]" />
-                          <span className="text-xs font-medium text-gray-700">
+                          <type.icon className="text-2xl mb-1 text-[#19183B] group-hover:scale-110 transition-transform duration-300" />
+                          <span className="text-xs font-medium text-[#2D2D2D]">
                             {type.label}
                           </span>
-                        </label>
+                        </motion.label>
                       ))}
                     </div>
                   </div>
@@ -633,46 +673,59 @@ const Signup = () => {
                       name="agreeTerms"
                       checked={formData.agreeTerms}
                       onChange={handleInputChange}
-                      className="h-5 w-5 text-[#1C352D] border-gray-300 rounded focus:ring-[#1C352D]/50"
+                      whileHover={{ scale: 1.05 }}
+                      className="h-5 w-5 text-[#19183B] border-[#E6E6FA] rounded focus:ring-[#4B4A8C]/50 transition-all duration-300"
                       whileFocus={{ scale: 1.05 }}
                     />
-                    <label className="text-sm text-gray-600 leading-relaxed">
+                    <label className="text-sm text-[#6B7280] leading-relaxed">
                       I agree to the{" "}
-                      <button
+                      <motion.button
                         type="button"
                         onClick={() =>
                           alert("Terms of Service - Feature coming soon!")
                         }
-                        className="text-[#1C352D] hover:text-[#2E4F3F] underline transition-all duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        className="text-[#19183B] hover:text-[#4B4A8C] underline relative group transition-all duration-300"
                       >
                         Terms of Service
-                      </button>{" "}
+                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#4B4A8C] transition-all duration-200 group-hover:w-full"></span>
+                      </motion.button>{" "}
                       and{" "}
-                      <button
+                      <motion.button
                         type="button"
                         onClick={() =>
                           alert("Privacy Policy - Feature coming soon!")
                         }
-                        className="text-[#1C352D] hover:text-[#2E4F3F] underline transition-all duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        className="text-[#19183B] hover:text-[#4B4A8C] underline relative group transition-all duration-300"
                       >
                         Privacy Policy
-                      </button>
+                        <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#4B4A8C] transition-all duration-200 group-hover:w-full"></span>
+                      </motion.button>
                     </label>
                   </div>
                   <div className="flex space-x-4">
                     <motion.button
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                      }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={handlePrevStep}
-                      className="flex-1 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all duration-300"
+                      className="flex-1 py-4 bg-[#E6E6FA] text-[#2D2D2D] rounded-xl font-semibold transition-all duration-300 hover:bg-[#4B4A8C] hover:text-white"
                     >
                       Back
                     </motion.button>
                     <motion.button
+                      whileHover={{
+                        scale: 1.05,
+                        boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+                      }}
                       whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={loading}
-                      className="flex-1 py-4 bg-gradient-to-r from-[#1C352D] to-[#2E4F3F] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                      className="flex-1 py-4 bg-gradient-to-r from-[#19183B] to-[#4B4A8C] text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center hover:bg-[#4B4A8C]"
                     >
                       {loading ? (
                         <motion.div
@@ -689,7 +742,7 @@ const Signup = () => {
                         </motion.div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <FaLock />
+                          <FaLock className="group-hover:scale-110 transition-transform duration-300" />
                           Complete Signup
                         </div>
                       )}
@@ -717,11 +770,15 @@ const Signup = () => {
 
           {/* Google Login */}
           <motion.button
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 0 15px rgba(25, 24, 59, 0.3)",
+            }}
             whileTap={{ scale: 0.98 }}
             onClick={handleGoogleLogin}
-            className="mt-6 w-full py-4 bg-white border border-gray-200 rounded-xl flex items-center justify-center gap-2 text-gray-700 font-medium transition-all duration-300"
+            className="mt-6 w-full py-4 bg-[#F8F9FA] border border-[#E6E6FA] rounded-xl flex items-center justify-center gap-2 text-[#2D2D2D] font-medium transition-all duration-300 hover:border-[#4B4A8C] hover:bg-[#E6E6FA]"
           >
-            <FcGoogle className="text-xl" />
+            <FcGoogle className="text-xl group-hover:scale-110 transition-transform duration-300" />
             Continue with Google
           </motion.button>
 
@@ -730,16 +787,18 @@ const Signup = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}
-            className="text-center pt-6 border-t border-gray-200"
+            className="text-center pt-6 border-t border-[#E6E6FA]"
           >
-            <p className="text-gray-600">
+            <p className="text-[#6B7280]">
               Already have an account?{" "}
-              <button
+              <motion.button
                 onClick={() => navigate("/login")}
-                className="text-[#1C352D] hover:text-[#2E4F3F] font-semibold hover:underline transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                className="text-[#19183B] hover:text-[#4B4A8C] font-semibold relative group transition-all duration-300"
               >
                 Sign In
-              </button>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#4B4A8C] transition-all duration-200 group-hover:w-full"></span>
+              </motion.button>
             </p>
           </motion.div>
         </div>
@@ -747,7 +806,7 @@ const Signup = () => {
 
       <style jsx>{`
         input:focus {
-          box-shadow: 0 0 0 3px rgba(28, 53, 45, 0.1);
+          box-shadow: 0 0 0 3px rgba(75, 74, 140, 0.2);
         }
         .sr-only {
           position: absolute;
