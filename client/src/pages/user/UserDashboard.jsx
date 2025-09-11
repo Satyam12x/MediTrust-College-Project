@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import {
   Upload,
   Eye,
@@ -87,10 +88,12 @@ const Dashboard = () => {
   const [userData, setUserData] = useState({
     name: "",
     email: "",
-    impact: { livesTouched: 0, verificationStatus: "Not Verified" },
+    impact: { livesTouched: 0, kycVerificationStatus: "Not KYC Verified" },
     badges: [],
+    status: "pending",
   });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   // Fetch data from backend
   useEffect(() => {
@@ -100,7 +103,7 @@ const Dashboard = () => {
         const token = localStorage.getItem("token");
         if (!token) {
           setError("Please log in to view your dashboard");
-          setIsLoading(false);
+          navigate("/login");
           return;
         }
 
@@ -108,16 +111,27 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         };
 
-        // Fetch all data concurrently
+        // Fetch profile first to check OTP verification
+        const profileResponse = await axios.get(
+          "http://localhost:5000/api/user/profile",
+          config
+        );
+        const profile = profileResponse.data;
+
+        if (profile.status !== "completed") {
+          setError("Please complete OTP verification to access the dashboard");
+          navigate("/verify");
+          return;
+        }
+
+        // Fetch all other data concurrently
         const [
-          profileResponse,
           statsResponse,
           requestsResponse,
           donationsResponse,
           notificationsResponse,
           medicinesResponse,
         ] = await Promise.all([
-          axios.get("http://localhost:5000/api/user/profile", config),
           axios.get("http://localhost:5000/api/user/stats", config),
           axios.get("http://localhost:5000/api/user/requests", config),
           axios.get("http://localhost:5000/api/user/donations", config),
@@ -126,7 +140,6 @@ const Dashboard = () => {
         ]);
 
         // Process profile data
-        const profile = profileResponse.data;
         setUserData({
           name:
             profile.firstName && profile.lastName
@@ -135,9 +148,9 @@ const Dashboard = () => {
           email: profile.email || "",
           impact: {
             livesTouched: statsResponse.data.livesHelped || 0,
-            verificationStatus: profile.kycVerified
+            kycVerificationStatus: profile.kycVerified
               ? "KYC Verified"
-              : "Not Verified",
+              : "Not KYC Verified",
           },
           badges:
             profile.certificates?.map((cert) => ({
@@ -145,6 +158,7 @@ const Dashboard = () => {
               description: "Awarded for your contributions",
               certificateLink: cert.url || "#",
             })) || [],
+          status: profile.status,
         });
 
         setStats(statsResponse.data);
@@ -159,15 +173,21 @@ const Dashboard = () => {
           err.response?.data?.error ||
             (err.response?.status === 401
               ? "Please log in to view your dashboard"
+              : err.response?.status === 403
+              ? "Please complete OTP verification"
               : "Failed to load dashboard data")
         );
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("token");
+          navigate(err.response?.status === 401 ? "/login" : "/verify");
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const isNewDonor = donations.length === 0 && requests.length === 0;
 
@@ -196,6 +216,22 @@ const Dashboard = () => {
         return "bg-gray-500";
     }
   };
+
+  if (error && userData.status !== "completed") {
+    return (
+      <div className="min-h-screen bg-white text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif] flex items-center justify-center">
+        <div className="text-center p-8 bg-gray-100 rounded-xl border border-gray-200 shadow-sm">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
+          <button
+            onClick={() => navigate("/verify")}
+            className="bg-[#19183B] text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-90 transition-opacity"
+          >
+            Go to Verification
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif]">
@@ -329,10 +365,10 @@ const Dashboard = () => {
                           </div>
                           <div>
                             <h3 className="font-bold text-lg">
-                              Verification Status
+                              KYC Verification
                             </h3>
                             <p className="text-sm font-semibold text-green-600">
-                              {userData.impact.verificationStatus}
+                              {userData.impact.kycVerificationStatus}
                             </p>
                           </div>
                         </div>
