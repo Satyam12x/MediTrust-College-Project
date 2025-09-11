@@ -1,3 +1,4 @@
+// Updated Sidebar.jsx
 import React, { useState, useEffect } from "react";
 import {
   Upload,
@@ -10,6 +11,7 @@ import {
   Award,
   TrendingUp,
   Package,
+  User,
 } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +20,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   const [userData, setUserData] = useState({
     name: "User",
     userType: "Donor",
-    profilePicture: "https://via.placeholder.com/48", // Fallback avatar
+    kycVerified: false,
+    profilePicture: "https://via.placeholder.com/48",
+    status: "pending",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,14 +61,22 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         );
         const profile = response.data;
 
+        if (profile.status !== "completed") {
+          setError("Please complete OTP verification to access the dashboard");
+          navigate("/verify");
+          return;
+        }
+
         setUserData({
           name:
             profile.firstName && profile.lastName
               ? `${profile.firstName} ${profile.lastName}`
               : profile.email || "User",
           userType: formatUserType(profile.userType),
+          kycVerified: profile.kycVerified,
           profilePicture:
             profile.profilePicture || "https://via.placeholder.com/48",
+          status: profile.status,
         });
         setError("");
       } catch (err) {
@@ -73,11 +85,13 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           err.response?.data?.error ||
             (err.response?.status === 401
               ? "Please log in to view your profile"
+              : err.response?.status === 403
+              ? "Please complete OTP verification"
               : "Failed to load profile data")
         );
         if (err.response?.status === 401 || err.response?.status === 403) {
           localStorage.removeItem("token");
-          navigate("/login");
+          navigate(err.response?.status === 401 ? "/login" : "/verify");
         }
       } finally {
         setIsLoading(false);
@@ -117,10 +131,27 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       <div className="rounded-full size-12 bg-gray-300 animate-pulse"></div>
       <div className="flex-1">
         <div className="h-5 bg-gray-300 rounded animate-pulse mb-2"></div>
-        <div className="h-4 bg-gray-300 rounded animate-pulse w-3/4"></div>
+        <div className="h-4 bg-gray-300 rounded animate-pulse w-3/4 mb-1"></div>
+        <div className="h-3 bg-gray-300 rounded animate-pulse w-1/2"></div>
       </div>
     </div>
   );
+
+  if (error && userData.status !== "completed") {
+    return (
+      <div className="min-h-screen bg-gray-100 text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif] flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-xl border border-gray-200 shadow-sm">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
+          <button
+            onClick={() => navigate("/verify")}
+            className="bg-[#19183B] text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-90 transition-opacity"
+          >
+            Go to Verification
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <aside className="w-64 bg-gray-100 p-6 flex flex-col justify-between min-h-screen sticky top-0 font-['Space_Grotesk','Noto_Sans',sans-serif] text-gray-900">
@@ -138,11 +169,14 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
               alt="User avatar"
               className="rounded-full size-12 object-cover"
               src={userData.profilePicture}
-              onError={(e) => (e.target.src = "https://via.placeholder.com/48")} // Fallback on image error
+              onError={(e) => (e.target.src = "https://via.placeholder.com/48")}
             />
             <div>
               <h1 className="font-bold text-lg">{userData.name}</h1>
               <p className="text-sm text-gray-600">{userData.userType}</p>
+              <p className="text-xs text-gray-500">
+                {userData.kycVerified ? "KYC Verified" : "Not KYC Verified"}
+              </p>
             </div>
           </div>
         )}
@@ -164,6 +198,13 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         </nav>
       </div>
       <div className="flex flex-col gap-2">
+        <button
+          className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300"
+          onClick={() => navigate("/profile")}
+        >
+          <User className="w-5 h-5" />
+          <span>Profile</span>
+        </button>
         <button className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300">
           <Settings className="w-5 h-5" />
           <span>Settings</span>
