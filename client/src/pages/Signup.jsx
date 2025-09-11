@@ -149,18 +149,9 @@ const Signup = () => {
       try {
         setLoading(true);
         const response = await axios.post("http://localhost:5000/api/signup", {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          age: formData.age,
           email: formData.email,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
-          userType: formData.userType,
-          agreeTerms: formData.agreeTerms,
-          registrationNumber:
-            formData.userType === "hospital"
-              ? formData.registrationNumber
-              : undefined,
         });
         setOtpSent(true);
         setError("");
@@ -202,19 +193,46 @@ const Signup = () => {
       setError("Please enter a valid 6-digit OTP");
       return;
     }
+    // Additional validation for profile fields (must be filled in previous steps)
+    if (!formData.firstName || !formData.lastName || !formData.age) {
+      setError("Please go back and fill in your personal details");
+      return;
+    }
+    if (formData.userType === "hospital" && !formData.registrationNumber) {
+      setError("Please provide a registration number for hospital");
+      return;
+    }
     try {
       setLoading(true);
       const otpResponse = await axios.post(
-        "http://localhost:5000/api/otp/verify",
+        "http://localhost:5000/api/complete-registration",
         {
           email: formData.email,
           otp,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          age: formData.age,
+          userType: formData.userType,
+          agreeTerms: formData.agreeTerms,
+          registrationNumber:
+            formData.userType === "hospital"
+              ? formData.registrationNumber
+              : undefined,
         }
       );
       setLoading(false);
       alert(otpResponse.data.message || "Account verified successfully");
       localStorage.setItem("token", otpResponse.data.token);
-      navigate("/");
+
+      // Role-based redirect
+      const { userType } = otpResponse.data.user;
+      if (userType === "donor" || userType === "patient") {
+        navigate("/user"); // Normal user redirect
+      } else if (userType === "hospital") {
+        navigate("/hospital"); // Hospital dashboard (adjust route if needed)
+      } else {
+        navigate("/"); // Default fallback
+      }
     } catch (err) {
       setError(err.response?.data?.error || "Failed to verify OTP");
       console.error("OTP Verification Error:", err.response?.data);
