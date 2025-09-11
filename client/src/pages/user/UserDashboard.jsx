@@ -85,6 +85,8 @@ const Dashboard = () => {
   const [donations, setDonations] = useState([]);
   const [availableMedicines, setAvailableMedicines] = useState([]);
   const [userData, setUserData] = useState({
+    name: "",
+    email: "",
     impact: { livesTouched: 0, verificationStatus: "Not Verified" },
     badges: [],
   });
@@ -108,43 +110,57 @@ const Dashboard = () => {
 
         // Fetch all data concurrently
         const [
+          profileResponse,
           statsResponse,
           requestsResponse,
           donationsResponse,
           notificationsResponse,
           medicinesResponse,
-          userResponse,
         ] = await Promise.all([
+          axios.get("http://localhost:5000/api/user/profile", config),
           axios.get("http://localhost:5000/api/user/stats", config),
           axios.get("http://localhost:5000/api/user/requests", config),
           axios.get("http://localhost:5000/api/user/donations", config),
           axios.get("http://localhost:5000/api/user/notifications", config),
           axios.get("http://localhost:5000/api/medicines/available"),
-          axios.get("http://localhost:5000/api/user/profile", config),
         ]);
+
+        // Process profile data
+        const profile = profileResponse.data;
+        setUserData({
+          name:
+            profile.firstName && profile.lastName
+              ? `${profile.firstName} ${profile.lastName}`
+              : profile.email || "User",
+          email: profile.email || "",
+          impact: {
+            livesTouched: statsResponse.data.livesHelped || 0,
+            verificationStatus: profile.kycVerified
+              ? "KYC Verified"
+              : "Not Verified",
+          },
+          badges:
+            profile.certificates?.map((cert) => ({
+              title: cert.certificateId || "Certificate",
+              description: "Awarded for your contributions",
+              certificateLink: cert.url || "#",
+            })) || [],
+        });
 
         setStats(statsResponse.data);
         setRequests(requestsResponse.data);
         setDonations(donationsResponse.data);
         setNotifications(notificationsResponse.data);
         setAvailableMedicines(medicinesResponse.data);
-        setUserData({
-          impact: {
-            livesTouched: statsResponse.data.livesHelped || 0,
-            verificationStatus: userResponse.data.kycVerified
-              ? "KYC Verified"
-              : "Not Verified",
-          },
-          badges: userResponse.data.certificates.map((cert) => ({
-            title: cert.certificateId,
-            description: "Awarded for your contributions",
-            certificateLink: cert.url || "#",
-          })),
-        });
         setError("");
       } catch (err) {
         console.error("Dashboard Data Fetch Error:", err.response?.data);
-        setError(err.response?.data?.error || "Failed to load dashboard data");
+        setError(
+          err.response?.data?.error ||
+            (err.response?.status === 401
+              ? "Please log in to view your dashboard"
+              : "Failed to load dashboard data")
+        );
       } finally {
         setIsLoading(false);
       }
@@ -197,7 +213,7 @@ const Dashboard = () => {
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
                 <div>
                   <h1 className="text-3xl font-bold">
-                    Welcome back, {userData.name || "User"}!
+                    Welcome back, {userData.name}!
                   </h1>
                   <p className="text-gray-600 mt-1">
                     Your actions today can save a life. Let's make a difference.
@@ -326,44 +342,50 @@ const Dashboard = () => {
                   <section>
                     <h2 className="text-2xl font-bold mb-4">Your Badges</h2>
                     <div className="bg-gray-100 rounded-xl p-6 space-y-4 border border-gray-200">
-                      {isLoading
-                        ? Array.from({ length: 2 }).map((_, i) => (
+                      {isLoading ? (
+                        Array.from({ length: 2 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-4 p-4 bg-gray-200 rounded-lg animate-pulse"
+                          >
+                            <div className="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"></div>
+                            <div>
+                              <div className="h-4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                              <div className="h-3 bg-gray-300 rounded animate-pulse w-3/4"></div>
+                            </div>
+                          </div>
+                        ))
+                      ) : userData.badges.length > 0 ? (
+                        userData.badges.map((badge, index) => (
+                          <div key={index} className="flex items-start gap-4">
                             <div
-                              key={i}
-                              className="flex items-start gap-4 p-4 bg-gray-200 rounded-lg animate-pulse"
+                              className={`rounded-full size-10 flex-shrink-0 flex items-center justify-center ${
+                                index === 0
+                                  ? "bg-blue-100 text-blue-600"
+                                  : "bg-yellow-100 text-yellow-600"
+                              }`}
                             >
-                              <div className="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"></div>
-                              <div>
-                                <div className="h-4 bg-gray-300 rounded animate-pulse mb-2"></div>
-                                <div className="h-3 bg-gray-300 rounded animate-pulse w-3/4"></div>
-                              </div>
+                              <Award className="w-5 h-5" />
                             </div>
-                          ))
-                        : userData.badges.map((badge, index) => (
-                            <div key={index} className="flex items-start gap-4">
-                              <div
-                                className={`rounded-full size-10 flex-shrink-0 flex items-center justify-center ${
-                                  index === 0
-                                    ? "bg-blue-100 text-blue-600"
-                                    : "bg-yellow-100 text-yellow-600"
-                                }`}
+                            <div>
+                              <h3 className="font-bold">{badge.title}</h3>
+                              <p className="text-sm text-gray-600">
+                                {badge.description}
+                              </p>
+                              <a
+                                className="text-sm text-[#19183B] font-semibold hover:underline"
+                                href={badge.certificateLink}
                               >
-                                <Award className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h3 className="font-bold">{badge.title}</h3>
-                                <p className="text-sm text-gray-600">
-                                  {badge.description}
-                                </p>
-                                <a
-                                  className="text-sm text-[#19183B] font-semibold hover:underline"
-                                  href={badge.certificateLink}
-                                >
-                                  View Certificate
-                                </a>
-                              </div>
+                                View Certificate
+                              </a>
                             </div>
-                          ))}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-600 text-sm">
+                          No badges earned yet. Keep donating to earn rewards!
+                        </p>
+                      )}
                     </div>
                   </section>
                 </div>
@@ -376,8 +398,7 @@ const Dashboard = () => {
                 <div>
                   <h1 className="text-4xl font-bold">Dashboard</h1>
                   <p className="text-gray-600 mt-1">
-                    Welcome back, {userData.name || "User"}! Here's your impact
-                    overview.
+                    Welcome back, {userData.name}! Here's your impact overview.
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -409,21 +430,21 @@ const Dashboard = () => {
                   : [
                       {
                         title: "Total Donations",
-                        value: stats.totalDonations,
+                        value: stats.totalDonations || 0,
                         icon: Heart,
                         color: "from-[#19183B] to-[#2C2B5A]",
                         change: stats.donationChange || "+0%",
                       },
                       {
                         title: "Active Requests",
-                        value: stats.activeRequests,
+                        value: stats.activeRequests || 0,
                         icon: Clock,
                         color: "from-blue-500 to-blue-600",
                         change: stats.requestChange || "+0%",
                       },
                       {
                         title: "Completed",
-                        value: stats.completedTransactions,
+                        value: stats.completedTransactions || 0,
                         icon: CheckCircle,
                         color: "from-purple-500 to-purple-600",
                         change: stats.transactionChange || "+0%",
