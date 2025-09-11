@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Upload,
   Truck,
@@ -11,8 +11,19 @@ import {
   TrendingUp,
   Package,
 } from "lucide-react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
+  const [userData, setUserData] = useState({
+    name: "User",
+    userType: "Donor",
+    profilePicture: "https://via.placeholder.com/48", // Fallback avatar
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
   const navItems = [
     { id: "dashboard", icon: TrendingUp, label: "Dashboard", active: true },
     { id: "upload", icon: Upload, label: "Upload Medicine" },
@@ -24,20 +35,117 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: "certificates", icon: Award, label: "Certificates" },
   ];
 
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Please log in to view your profile");
+          navigate("/login");
+          return;
+        }
+
+        const config = {
+          headers: { Authorization: `Bearer ${token}` },
+        };
+
+        const response = await axios.get(
+          "http://localhost:5000/api/user/profile",
+          config
+        );
+        const profile = response.data;
+
+        setUserData({
+          name:
+            profile.firstName && profile.lastName
+              ? `${profile.firstName} ${profile.lastName}`
+              : profile.email || "User",
+          userType: formatUserType(profile.userType),
+          profilePicture:
+            profile.profilePicture || "https://via.placeholder.com/48",
+        });
+        setError("");
+      } catch (err) {
+        console.error("Sidebar Profile Fetch Error:", err.response?.data);
+        setError(
+          err.response?.data?.error ||
+            (err.response?.status === 401
+              ? "Please log in to view your profile"
+              : "Failed to load profile data")
+        );
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
+
+  // Format userType for display
+  const formatUserType = (userType) => {
+    if (!userType) return "Donor";
+    const types = userType.split(",").map((type) => {
+      switch (type.trim().toLowerCase()) {
+        case "donor":
+          return "Donor";
+        case "patient":
+          return "Patient";
+        case "hospital":
+          return "Hospital";
+        default:
+          return type.trim();
+      }
+    });
+    return types.join(" & ");
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  // Skeleton loader for user info
+  const SkeletonUserInfo = () => (
+    <div className="flex items-center gap-3 mb-8">
+      <div className="rounded-full size-12 bg-gray-300 animate-pulse"></div>
+      <div className="flex-1">
+        <div className="h-5 bg-gray-300 rounded animate-pulse mb-2"></div>
+        <div className="h-4 bg-gray-300 rounded animate-pulse w-3/4"></div>
+      </div>
+    </div>
+  );
+
   return (
     <aside className="w-64 bg-gray-100 p-6 flex flex-col justify-between min-h-screen sticky top-0 font-['Space_Grotesk','Noto_Sans',sans-serif] text-gray-900">
       <div>
-        <div className="flex items-center gap-3 mb-8">
-          <img
-            alt="User avatar"
-            className="rounded-full size-12"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuARb0gYAkAxRyUdJV3IYHv9LVzgVlt8r7obGLPw9_JKSJSUYxRaCaBoNBP_ab7xJS-vXN64fuV2qGJA6spQvjfjUnn2OUs0mx9r3AtfinmN5rsemTNn9o8VznDY4UUR7oY5WYTzBiqbLYQHKHzet7q4cHpL4x22B5pQHhszXwhUe5UCQ4IOfqakJzi94Z2AAk15c9yfdt5u1LCwxYqOoISAH9avusFFywaN0RzV4GRatTehxD_W8UrNTxJL-ZrkkSYU6NotPeDVGuz6"
-          />
-          <div>
-            <h1 className="font-bold text-lg">Sophia Clark</h1>
-            <p className="text-sm text-gray-600">Donor & Receiver</p>
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-lg text-red-600 text-sm text-center">
+            {error}
           </div>
-        </div>
+        )}
+        {isLoading ? (
+          <SkeletonUserInfo />
+        ) : (
+          <div className="flex items-center gap-3 mb-8">
+            <img
+              alt="User avatar"
+              className="rounded-full size-12 object-cover"
+              src={userData.profilePicture}
+              onError={(e) => (e.target.src = "https://via.placeholder.com/48")} // Fallback on image error
+            />
+            <div>
+              <h1 className="font-bold text-lg">{userData.name}</h1>
+              <p className="text-sm text-gray-600">{userData.userType}</p>
+            </div>
+          </div>
+        )}
         <nav className="flex flex-col gap-2">
           {navItems.map((item) => (
             <button
@@ -60,7 +168,10 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           <Settings className="w-5 h-5" />
           <span>Settings</span>
         </button>
-        <button className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all duration-300">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all duration-300"
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
         </button>
