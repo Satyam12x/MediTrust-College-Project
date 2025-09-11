@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
+import axios from "axios";
 import {
   Upload,
   Eye,
@@ -82,107 +83,74 @@ const Dashboard = () => {
   const [stats, setStats] = useState({});
   const [requests, setRequests] = useState([]);
   const [donations, setDonations] = useState([]);
+  const [availableMedicines, setAvailableMedicines] = useState([]);
   const [userData, setUserData] = useState({
-    impact: { livesTouched: 12, verificationStatus: "KYC Verified" },
-    badges: [
-      {
-        title: "Top Donor - July 2024",
-        description: "Thanks for your generosity!",
-        certificateLink: "#",
-      },
-      {
-        title: "Community Champion",
-        description: "For 10+ donations.",
-        certificateLink: "#",
-      },
-    ],
+    impact: { livesTouched: 0, verificationStatus: "Not Verified" },
+    badges: [],
   });
+  const [error, setError] = useState("");
 
-  // Simulate data loading
+  // Fetch data from backend
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setStats({
-        totalDonations: 0,
-        totalRequests: 12,
-        completedTransactions: 38,
-        activeRequests: 7,
-      });
-      setRequests([
-        {
-          id: "#12345",
-          medicine: "Amoxicillin",
-          quantity: "500mg",
-          status: "pending",
-          date: "2024-07-26",
-          priority: "high",
-        },
-        {
-          id: "#67890",
-          medicine: "Ibuprofen",
-          quantity: "200mg",
-          status: "approved",
-          date: "2024-07-20",
-          priority: "medium",
-        },
-        {
-          id: "#11223",
-          medicine: "Paracetamol",
-          quantity: "500mg",
-          status: "completed",
-          date: "2024-07-15",
-          priority: "low",
-        },
-      ]);
-      setDonations([
-        {
-          id: "#98765",
-          medicine: "Aspirin",
-          quantity: "100mg",
-          date: "2024-07-25",
-          recipient: "City Hospital",
-          impact: 25,
-        },
-        {
-          id: "#54321",
-          medicine: "Cetirizine",
-          quantity: "10mg",
-          date: "2024-07-18",
-          recipient: "Community Clinic",
-          impact: 15,
-        },
-        {
-          id: "#45678",
-          medicine: "Omeprazole",
-          quantity: "20mg",
-          date: "2024-07-10",
-          recipient: "Local NGO",
-          impact: 30,
-        },
-      ]);
-      setNotifications([
-        {
-          type: "success",
-          title: "Request Approved",
-          message: "Your request for Ibuprofen has been approved.",
-          time: "2 min ago",
-        },
-        {
-          type: "info",
-          title: "Donation Received",
-          message: "Thank you for your donation of Aspirin.",
-          time: "1 hour ago",
-        },
-        {
-          type: "warning",
-          title: "New Medicine Available",
-          message: "A new batch of Paracetamol is now available.",
-          time: "3 hours ago",
-        },
-      ]);
-    }, 2000);
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Please log in to view your dashboard");
+          setIsLoading(false);
+          return;
+        }
 
-    return () => clearTimeout(timer);
+        const config = {
+          headers: { Authorization: `Bearer ${token}` },
+        };
+
+        // Fetch all data concurrently
+        const [
+          statsResponse,
+          requestsResponse,
+          donationsResponse,
+          notificationsResponse,
+          medicinesResponse,
+          userResponse,
+        ] = await Promise.all([
+          axios.get("http://localhost:5000/api/user/stats", config),
+          axios.get("http://localhost:5000/api/user/requests", config),
+          axios.get("http://localhost:5000/api/user/donations", config),
+          axios.get("http://localhost:5000/api/user/notifications", config),
+          axios.get("http://localhost:5000/api/medicines/available"),
+          axios.get("http://localhost:5000/api/user/profile", config),
+        ]);
+
+        setStats(statsResponse.data);
+        setRequests(requestsResponse.data);
+        setDonations(donationsResponse.data);
+        setNotifications(notificationsResponse.data);
+        setAvailableMedicines(medicinesResponse.data);
+        setUserData({
+          impact: {
+            livesTouched: statsResponse.data.livesHelped || 0,
+            verificationStatus: userResponse.data.kycVerified
+              ? "KYC Verified"
+              : "Not Verified",
+          },
+          badges: userResponse.data.certificates.map((cert) => ({
+            title: cert.certificateId,
+            description: "Awarded for your contributions",
+            certificateLink: cert.url || "#",
+          })),
+        });
+        setError("");
+      } catch (err) {
+        console.error("Dashboard Data Fetch Error:", err.response?.data);
+        setError(err.response?.data?.error || "Failed to load dashboard data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const isNewDonor = donations.length === 0 && requests.length === 0;
@@ -218,12 +186,19 @@ const Dashboard = () => {
       <div className="flex">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <main className="flex-1 p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-200 rounded-lg text-red-600 text-center">
+              {error}
+            </div>
+          )}
           {isNewDonor ? (
             <div>
               {/* Header */}
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold">Welcome back, Sophia!</h1>
+                  <h1 className="text-3xl font-bold">
+                    Welcome back, {userData.name || "User"}!
+                  </h1>
                   <p className="text-gray-600 mt-1">
                     Your actions today can save a life. Let's make a difference.
                   </p>
@@ -249,7 +224,8 @@ const Dashboard = () => {
                     </div>
                     <h2 className="text-2xl font-bold mb-2">Be a Hero Today</h2>
                     <p className="text-gray-600 mb-6 max-w-md">
-                      Your surplus medicine could be the miracle someone is praying for. Donate now and bring hope to those in need.
+                      Your surplus medicine could be the miracle someone is
+                      praying for. Donate now and bring hope to those in need.
                     </p>
                     <button className="flex items-center gap-2 bg-[#19183B] text-white font-bold py-3 px-6 rounded-full hover:bg-opacity-90 transition-opacity text-lg">
                       <Upload className="w-5 h-5" />
@@ -265,41 +241,21 @@ const Dashboard = () => {
                         ? Array.from({ length: 4 }).map((_, i) => (
                             <SkeletonNewDonorCard key={i} />
                           ))
-                        : [
-                            {
-                              name: "Amoxicillin 500mg",
-                              type: "Antibiotic",
-                              color: "bg-blue-100 text-blue-600",
-                            },
-                            {
-                              name: "Lisinopril 10mg",
-                              type: "Blood Pressure",
-                              color: "bg-red-100 text-red-600",
-                            },
-                            {
-                              name: "Metformin 500mg",
-                              type: "Diabetes",
-                              color: "bg-purple-100 text-purple-600",
-                            },
-                            {
-                              name: "Ibuprofen 200mg",
-                              type: "Pain Relief",
-                              color: "bg-yellow-100 text-yellow-600",
-                            },
-                          ].map((medicine, index) => (
+                        : availableMedicines.map((medicine, index) => (
                             <div
                               key={index}
                               className="bg-gray-100 rounded-xl p-4 flex items-center gap-4 border border-gray-200 hover:border-[#19183B]"
                             >
-                              <div className={`p-3 rounded-full ${medicine.color}`}>
+                              <div className="p-3 rounded-full bg-blue-100 text-blue-600">
                                 <Package className="w-5 h-5" />
                               </div>
                               <div>
                                 <h3 className="font-bold text-lg">
-                                  {medicine.name}
+                                  {medicine.name} {medicine.quantity}
                                 </h3>
                                 <p className="text-sm text-gray-600">
-                                  {medicine.type}
+                                  {medicine.storageConditions ||
+                                    "General Medicine"}
                                 </p>
                               </div>
                               <button className="ml-auto bg-gray-200 hover:bg-[#19183B] hover:text-white text-gray-900 font-bold py-2 px-3 rounded-full text-sm transition-colors">
@@ -384,10 +340,7 @@ const Dashboard = () => {
                             </div>
                           ))
                         : userData.badges.map((badge, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start gap-4"
-                            >
+                            <div key={index} className="flex items-start gap-4">
                               <div
                                 className={`rounded-full size-10 flex-shrink-0 flex items-center justify-center ${
                                   index === 0
@@ -423,7 +376,8 @@ const Dashboard = () => {
                 <div>
                   <h1 className="text-4xl font-bold">Dashboard</h1>
                   <p className="text-gray-600 mt-1">
-                    Welcome back, Sophia! Here's your impact overview.
+                    Welcome back, {userData.name || "User"}! Here's your impact
+                    overview.
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -458,28 +412,28 @@ const Dashboard = () => {
                         value: stats.totalDonations,
                         icon: Heart,
                         color: "from-[#19183B] to-[#2C2B5A]",
-                        change: "+12%",
+                        change: stats.donationChange || "+0%",
                       },
                       {
                         title: "Active Requests",
                         value: stats.activeRequests,
                         icon: Clock,
                         color: "from-blue-500 to-blue-600",
-                        change: "+5%",
+                        change: stats.requestChange || "+0%",
                       },
                       {
                         title: "Completed",
                         value: stats.completedTransactions,
                         icon: CheckCircle,
                         color: "from-purple-500 to-purple-600",
-                        change: "+18%",
+                        change: stats.transactionChange || "+0%",
                       },
                       {
                         title: "Impact Score",
-                        value: "95%",
+                        value: stats.impactScore || "0%",
                         icon: TrendingUp,
                         color: "from-orange-500 to-orange-600",
-                        change: "+8%",
+                        change: stats.impactChange || "+0%",
                       },
                     ].map((stat, index) => (
                       <div
@@ -577,7 +531,9 @@ const Dashboard = () => {
                                     </span>
                                   </td>
                                   <td className="p-4 text-gray-600">
-                                    {request.date}
+                                    {new Date(
+                                      request.date
+                                    ).toLocaleDateString()}
                                   </td>
                                 </tr>
                               ))}
@@ -632,11 +588,13 @@ const Dashboard = () => {
                                     {donation.quantity}
                                   </td>
                                   <td className="p-4 text-gray-600">
-                                    {donation.date}
+                                    {new Date(
+                                      donation.date
+                                    ).toLocaleDateString()}
                                   </td>
                                   <td className="p-4 text-gray-600 flex items-center gap-2">
                                     <MapPin className="w-4 h-4 text-[#19183B]" />
-                                    {donation.recipient}
+                                    {donation.recipient || "N/A"}
                                   </td>
                                 </tr>
                               ))}
@@ -705,15 +663,23 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">Lives Helped</span>
-                          <span className="text-[#19183B] font-bold">127</span>
+                          <span className="text-[#19183B] font-bold">
+                            {stats.livesHelped || 0}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Medicines Donated</span>
-                          <span className="text-[#19183B] font-bold">45</span>
+                          <span className="text-gray-600">
+                            Medicines Donated
+                          </span>
+                          <span className="text-[#19183B] font-bold">
+                            {stats.totalDonations || 0}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-gray-600">Trust Score</span>
-                          <span className="text-[#19183B] font-bold">98%</span>
+                          <span className="text-[#19183B] font-bold">
+                            {stats.trustScore || "0%"}
+                          </span>
                         </div>
                       </div>
                       <div className="mt-4 pt-4 border-t border-gray-200">
