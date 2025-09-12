@@ -24,33 +24,10 @@ import {
   Building,
   UserCheck,
   Settings,
-  Bell,
+  Image as ImageIcon,
   Eye,
   EyeOff,
-  Image as ImageIcon,
 } from "lucide-react";
-
-// Cloudinary widget script (loaded dynamically)
-const loadCloudinaryScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.cloudinary) {
-      resolve(window.cloudinary);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://widget.cloudinary.com/v2.0/global/all.js";
-    script.async = true;
-    script.onload = () => {
-      if (window.cloudinary) {
-        resolve(window.cloudinary);
-      } else {
-        reject(new Error("Cloudinary script loaded but window.cloudinary is undefined"));
-      }
-    };
-    script.onerror = () => reject(new Error("Failed to load Cloudinary script"));
-    document.body.appendChild(script);
-  });
-};
 
 // Skeleton Loading Components
 const SkeletonCard = () => (
@@ -124,6 +101,7 @@ const Profile = () => {
     confirm: false,
     otp: false,
   });
+  const [file, setFile] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -230,12 +208,69 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (
+      selectedFile &&
+      ["image/jpeg", "image/png", "image/jpg"].includes(selectedFile.type)
+    ) {
+      setFile(selectedFile);
+      setError("");
+    } else {
+      setError("Please select a valid image file (JPEG, JPG, or PNG)");
+      setFile(null);
+    }
+  };
+
+  const handleUploadProfilePicture = async () => {
+    if (!file) {
+      setError("Please select an image to upload");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError("");
+      setSuccess("");
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("profilePicture", file);
+
+      const response = await axios.post(
+        "http://localhost:5000/api/user/upload-profile-picture",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setUserData((prev) => ({
+        ...prev,
+        profilePicture: response.data.profilePicture,
+      }));
+      setSuccess("Profile picture updated successfully");
+      setFile(null);
+    } catch (err) {
+      console.error("Profile Picture Upload Error:", err.response?.data);
+      setError(err.response?.data?.error || "Failed to upload profile picture");
+      setSuccess("");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleUpdateEmail = async () => {
     try {
       setError("");
       setSuccess("");
       const token = localStorage.getItem("token");
-      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      if (
+        !formData.email ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      ) {
         setError("Please provide a valid email address");
         return;
       }
@@ -336,69 +371,6 @@ const Profile = () => {
       setSuccess(response.data.message || "Password updated successfully");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to update password");
-    }
-  };
-
-  const handleUploadProfilePicture = async () => {
-    try {
-      setError("");
-      setSuccess("");
-      // Fetch Cloudinary config from backend
-      const configResponse = await axios.get(
-        "http://localhost:5000/api/config/cloudinary"
-      );
-      const { cloudName, uploadPreset } = configResponse.data;
-      if (!cloudName || !uploadPreset) {
-        throw new Error("Cloudinary configuration not received from server");
-      }
-
-      const cloudinary = await loadCloudinaryScript();
-      const widget = cloudinary.createUploadWidget(
-        {
-          cloudName,
-          uploadPreset,
-          sources: ["local", "camera"],
-          multiple: false,
-          resourceType: "image",
-          clientAllowedFormats: ["png", "jpg", "jpeg"],
-          maxFileSize: 5000000, // 5MB
-          cropping: true,
-          folder: "meditrust_profiles",
-        },
-        async (error, result) => {
-          if (error) {
-            console.error("Cloudinary Widget Error:", error);
-            setError(
-              `Failed to upload image: ${error.message || "Unknown error"}`
-            );
-            return;
-          }
-          if (result.event === "success") {
-            const imageUrl = result.info.secure_url;
-            const token = localStorage.getItem("token");
-            try {
-              const response = await axios.post(
-                "http://localhost:5000/api/user/update-profile-picture",
-                { profilePicture: imageUrl },
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              setUserData((prev) => ({ ...prev, profilePicture: imageUrl }));
-              setSuccess(
-                response.data.message || "Profile picture updated successfully"
-              );
-            } catch (err) {
-              console.error("Profile Picture Update Error:", err.response?.data);
-              setError(
-                err.response?.data?.error || "Failed to update profile picture"
-              );
-            }
-          }
-        }
-      );
-      widget.open();
-    } catch (err) {
-      console.error("Image Upload Initialization Error:", err);
-      setError(`Failed to initialize image upload: ${err.message}`);
     }
   };
 
@@ -526,27 +498,49 @@ const Profile = () => {
                     {isLoading ? (
                       <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
                     ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
-                        {userData.profilePicture ? (
-                          <img
-                            src={userData.profilePicture}
-                            alt="Profile"
-                            className="w-12 h-12 rounded-full object-cover"
-                            onError={(e) =>
-                              (e.target.src = "/images/placeholder.png")
-                            }
+                      <div className="space-y-2">
+                        <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between">
+                          {userData.profilePicture ? (
+                            <img
+                              src={userData.profilePicture}
+                              alt="Profile"
+                              className="w-12 h-12 rounded-full object-cover"
+                              onError={(e) =>
+                                (e.target.src = "/images/placeholder.png")
+                              }
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-gray-400 flex items-center justify-center text-white">
+                              <User className="w-6 h-6" />
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/jpg"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            id="profile-picture-upload"
                           />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-gray-400 flex items-center justify-center text-white">
-                            <User className="w-6 h-6" />
-                          </div>
+                          <label
+                            htmlFor="profile-picture-upload"
+                            className="p-1 text-gray-500 hover:text-[#19183B] transition-colors cursor-pointer"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </label>
+                        </div>
+                        {file && (
+                          <button
+                            onClick={handleUploadProfilePicture}
+                            disabled={isLoading}
+                            className={`w-full bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity ${
+                              isLoading ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                          >
+                            {isLoading
+                              ? "Uploading..."
+                              : "Upload Profile Picture"}
+                          </button>
                         )}
-                        <button
-                          onClick={handleUploadProfilePicture}
-                          className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
                       </div>
                     )}
                   </div>
@@ -756,6 +750,149 @@ const Profile = () => {
                     )}
                   </div>
 
+                  {/* Password */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                      <Lock className="w-4 h-4" />
+                      Password
+                    </label>
+                    {isLoading ? (
+                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
+                    ) : isEditing.password ? (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <input
+                              type={showPassword.current ? "text" : "password"}
+                              name="currentPassword"
+                              value={formData.currentPassword}
+                              onChange={handleInputChange}
+                              placeholder="Enter current password"
+                              className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowPassword((prev) => ({
+                                  ...prev,
+                                  current: !prev.current,
+                                }))
+                              }
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
+                            >
+                              {showPassword.current ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <input
+                              type={showPassword.new ? "text" : "password"}
+                              name="newPassword"
+                              value={formData.newPassword}
+                              onChange={handleInputChange}
+                              placeholder="Enter new password"
+                              className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowPassword((prev) => ({
+                                  ...prev,
+                                  new: !prev.new,
+                                }))
+                              }
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
+                            >
+                              {showPassword.new ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <input
+                              type={showPassword.confirm ? "text" : "password"}
+                              name="confirmNewPassword"
+                              value={formData.confirmNewPassword}
+                              onChange={handleInputChange}
+                              placeholder="Confirm new password"
+                              className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowPassword((prev) => ({
+                                  ...prev,
+                                  confirm: !prev.confirm,
+                                }))
+                              }
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
+                            >
+                              {showPassword.confirm ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleUpdatePassword}
+                            disabled={
+                              !formData.currentPassword ||
+                              !formData.newPassword ||
+                              !formData.confirmNewPassword
+                            }
+                            className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Update Password
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsEditing((prev) => ({
+                                ...prev,
+                                password: false,
+                              }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                currentPassword: "",
+                                newPassword: "",
+                                confirmNewPassword: "",
+                              }));
+                            }}
+                            className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
+                        <p className="font-semibold text-gray-900">********</p>
+                        <button
+                          onClick={() =>
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              password: true,
+                            }))
+                          }
+                          className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Location */}
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
@@ -811,142 +948,6 @@ const Profile = () => {
                     )}
                   </div>
                 </div>
-              </section>
-
-              {/* Password Update */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-2xl font-bold mb-6">Change Password</h2>
-                {isEditing.password ? (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                        <Lock className="w-4 h-4" />
-                        Current Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword.current ? "text" : "password"}
-                          name="currentPassword"
-                          value={formData.currentPassword}
-                          onChange={handleInputChange}
-                          placeholder="Enter current password"
-                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPassword((prev) => ({
-                              ...prev,
-                              current: !prev.current,
-                            }))
-                          }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                        >
-                          {showPassword.current ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                        <Lock className="w-4 h-4" />
-                        New Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword.new ? "text" : "password"}
-                          name="newPassword"
-                          value={formData.newPassword}
-                          onChange={handleInputChange}
-                          placeholder="Enter new password"
-                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPassword((prev) => ({
-                              ...prev,
-                              new: !prev.new,
-                            }))
-                          }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                        >
-                          {showPassword.new ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                        <Lock className="w-4 h-4" />
-                        Confirm New Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword.confirm ? "text" : "password"}
-                          name="confirmNewPassword"
-                          value={formData.confirmNewPassword}
-                          onChange={handleInputChange}
-                          placeholder="Confirm new password"
-                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowPassword((prev) => ({
-                              ...prev,
-                              confirm: !prev.confirm,
-                            }))
-                          }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                        >
-                          {showPassword.confirm ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleUpdatePassword}
-                        className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity"
-                      >
-                        Update Password
-                      </button>
-                      <button
-                        onClick={() => {
-                          setIsEditing((prev) => ({ ...prev, password: false }));
-                          setFormData((prev) => ({
-                            ...prev,
-                            currentPassword: "",
-                            newPassword: "",
-                            confirmNewPassword: "",
-                          }));
-                        }}
-                        className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() =>
-                      setIsEditing((prev) => ({ ...prev, password: true }))
-                    }
-                    className="bg-gray-200 text-gray-900 px-4 py-3 rounded-lg border border-gray-300 hover:bg-gray-300 transition-colors"
-                  >
-                    Change Password
-                  </button>
-                )}
               </section>
             </div>
 
