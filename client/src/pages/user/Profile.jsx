@@ -27,7 +27,19 @@ import {
   Bell,
   Eye,
   EyeOff,
+  Image as ImageIcon,
 } from "lucide-react";
+
+// Cloudinary widget script (loaded dynamically)
+const loadCloudinaryScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "https://widget.cloudinary.com/v2.0/global/all.js";
+    script.async = true;
+    script.onload = () => resolve(window.cloudinary);
+    document.body.appendChild(script);
+  });
+};
 
 // Skeleton Loading Components
 const SkeletonCard = () => (
@@ -71,6 +83,7 @@ const Profile = () => {
     badges: [],
     joinDate: "",
     location: "",
+    profilePicture: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -82,6 +95,13 @@ const Profile = () => {
   const [editingEmail, setEditingEmail] = useState(false);
   const [editingPhone, setEditingPhone] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [editingPassword, setEditingPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -125,6 +145,7 @@ const Profile = () => {
           trustScore: statsResponse.data.trustScore || "0%",
           joinDate: profile.createdAt || new Date().toISOString(),
           location: profile.location || "Not specified",
+          profilePicture: profile.profilePicture || "",
           badges:
             profile.certificates?.map((cert, index) => ({
               title: cert.certificateId || `Certificate ${index + 1}`,
@@ -248,6 +269,88 @@ const Profile = () => {
     }
   };
 
+  const handleUpdatePassword = async () => {
+    try {
+      setError("");
+      setSuccess("");
+      if (newPassword.length < 6) {
+        setError("New password must be at least 6 characters long");
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        setError("New passwords do not match");
+        return;
+      }
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+
+      const response = await axios.post(
+        "http://localhost:5000/api/user/update-password",
+        { currentPassword, newPassword, confirmNewPassword },
+        config
+      );
+      setEditingPassword(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setSuccess(response.data.message || "Password updated successfully");
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to update password");
+    }
+  };
+
+  const handleUploadProfilePicture = async () => {
+    try {
+      setError("");
+      setSuccess("");
+      const cloudinary = await loadCloudinaryScript();
+      const widget = cloudinary.createUploadWidget(
+        {
+          cloudName: process.env.REACT_APP_CLOUDINARY_CLOUD_NAME,
+          uploadPreset: "meditrust_profile",
+          sources: ["local", "camera"],
+          multiple: false,
+          resourceType: "image",
+          clientAllowedFormats: ["png", "jpg", "jpeg"],
+          maxFileSize: 5000000, // 5MB
+        },
+        async (error, result) => {
+          if (error) {
+            setError("Failed to upload image");
+            return;
+          }
+          if (result.event === "success") {
+            const imageUrl = result.info.secure_url;
+            const token = localStorage.getItem("token");
+            const config = {
+              headers: { Authorization: `Bearer ${token}` },
+            };
+            try {
+              const response = await axios.post(
+                "http://localhost:5000/api/user/update-profile-picture",
+                { profilePicture: imageUrl },
+                config
+              );
+              setUserData((prev) => ({ ...prev, profilePicture: imageUrl }));
+              setSuccess(
+                response.data.message || "Profile picture updated successfully"
+              );
+            } catch (err) {
+              setError(
+                err.response?.data?.error || "Failed to update profile picture"
+              );
+            }
+          }
+        }
+      );
+      widget.open();
+    } catch (err) {
+      setError("Failed to initialize image upload");
+    }
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     setSuccess("Copied to clipboard!");
@@ -348,16 +451,49 @@ const Profile = () => {
                     <div className="w-24 h-2 bg-gray-300 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-[#19183B] rounded-full"
-                        style={{ width: "85%" }}
+                        style={{
+                          width: userData.profilePicture ? "90%" : "85%",
+                        }}
                       ></div>
                     </div>
                     <span className="text-sm font-semibold text-[#19183B]">
-                      85%
+                      {userData.profilePicture ? "90%" : "85%"}
                     </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Profile Picture */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                      <ImageIcon className="w-4 h-4" />
+                      Profile Picture
+                    </label>
+                    {isLoading ? (
+                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
+                    ) : (
+                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
+                        {userData.profilePicture ? (
+                          <img
+                            src={userData.profilePicture}
+                            alt="Profile"
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gray-400 flex items-center justify-center text-white">
+                            <User className="w-6 h-6" />
+                          </div>
+                        )}
+                        <button
+                          onClick={handleUploadProfilePicture}
+                          className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Name */}
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
@@ -582,6 +718,120 @@ const Profile = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Password Update */}
+                  <div className="space-y-2 col-span-2">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                      <Lock className="w-4 h-4" />
+                      Password
+                    </label>
+                    {isLoading ? (
+                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
+                    ) : editingPassword ? (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <input
+                            type={showCurrentPassword ? "text" : "password"}
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            placeholder="Current Password"
+                            className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowCurrentPassword(!showCurrentPassword)
+                            }
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          >
+                            {showCurrentPassword ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder="New Password"
+                            className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          >
+                            {showNewPassword ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type={showConfirmNewPassword ? "text" : "password"}
+                            value={confirmNewPassword}
+                            onChange={(e) =>
+                              setConfirmNewPassword(e.target.value)
+                            }
+                            placeholder="Confirm New Password"
+                            className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowConfirmNewPassword(!showConfirmNewPassword)
+                            }
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                          >
+                            {showConfirmNewPassword ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleUpdatePassword}
+                            disabled={
+                              !currentPassword ||
+                              !newPassword ||
+                              !confirmNewPassword
+                            }
+                            className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Update Password
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingPassword(false);
+                              setCurrentPassword("");
+                              setNewPassword("");
+                              setConfirmNewPassword("");
+                            }}
+                            className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
+                        <p className="font-semibold text-gray-900">••••••••</p>
+                        <button
+                          onClick={() => setEditingPassword(true)}
+                          className="p-1 text-gray-500 hover:text-[#19183B] transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
 
@@ -653,7 +903,7 @@ const Profile = () => {
                           : "bg-gray-100 text-gray-600 border-gray-200"
                       }`}
                     >
-                      {userData.kycVerified ? "Verified" : "Not Verified"}
+                      {userData.kycVerified ? "KYC Verified" : "Not Verified"}
                     </span>
                     {!userData.kycVerified && (
                       <button className="text-sm text-[#19183B] font-medium hover:underline">
@@ -830,15 +1080,17 @@ const Profile = () => {
                     </div>
                   </button>
 
-                  <button className="w-full bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-[#19183B] text-gray-900 py-3 px-4 rounded-lg transition-all duration-300 text-left flex items-center gap-3">
-                    <UserCheck className="w-5 h-5 text-[#19183B]" />
-                    <div>
-                      <p className="font-medium">Complete KYC</p>
-                      <p className="text-sm text-gray-600">
-                        Verify your identity
-                      </p>
-                    </div>
-                  </button>
+                  {!userData.kycVerified && (
+                    <button className="w-full bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-[#19183B] text-gray-900 py-3 px-4 rounded-lg transition-all duration-300 text-left flex items-center gap-3">
+                      <UserCheck className="w-5 h-5 text-[#19183B]" />
+                      <div>
+                        <p className="font-medium">Complete KYC</p>
+                        <p className="text-sm text-gray-600">
+                          Verify your identity
+                        </p>
+                      </div>
+                    </button>
+                  )}
                 </div>
               </section>
 
@@ -856,7 +1108,10 @@ const Profile = () => {
                         </p>
                       </div>
                     </div>
-                    <button className="text-[#19183B] font-medium hover:underline text-sm">
+                    <button
+                      onClick={() => setEditingPassword(true)}
+                      className="text-[#19183B] font-medium hover:underline text-sm"
+                    >
                       Change
                     </button>
                   </div>
