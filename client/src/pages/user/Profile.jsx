@@ -84,24 +84,35 @@ const Profile = () => {
     joinDate: "",
     location: "",
     profilePicture: "",
+    donationCount: 0,
+    requestCount: 0,
+    donationChange: "+0%",
+    requestChange: "+0%",
+    transactionChange: "+0%",
+    impactChange: "+0%",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [editingEmail, setEditingEmail] = useState(false);
-  const [editingPhone, setEditingPhone] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  const [editingPassword, setEditingPassword] = useState(false);
+  const [isEditing, setIsEditing] = useState({
+    email: false,
+    phone: false,
+    password: false,
+  });
+  const [formData, setFormData] = useState({
+    email: "",
+    phone: "",
+    otp: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+  const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+    otp: false,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -125,6 +136,7 @@ const Profile = () => {
         ]);
 
         const profile = profileResponse.data;
+        const stats = statsResponse.data;
 
         if (profile.status !== "completed") {
           setError("Please complete OTP verification to access your profile");
@@ -141,24 +153,26 @@ const Profile = () => {
           status: profile.status,
           kycVerified: profile.kycVerified,
           certificates: profile.certificates || [],
-          livesTouched: statsResponse.data.livesHelped || 0,
-          trustScore: statsResponse.data.trustScore || "0%",
+          livesTouched: stats.livesHelped || 0,
+          trustScore: stats.trustScore || "0%",
           joinDate: profile.createdAt || new Date().toISOString(),
           location: profile.location || "Not specified",
           profilePicture: profile.profilePicture || "",
-          badges:
-            profile.certificates?.map((cert, index) => ({
-              title: cert.certificateId || `Certificate ${index + 1}`,
-              description: "Awarded for your contributions to the community",
-              certificateLink: cert.url || "#",
-              date: cert.issuedAt || new Date().toISOString(),
-              type:
-                index % 3 === 0
-                  ? "gold"
-                  : index % 3 === 1
-                  ? "silver"
-                  : "bronze",
-            })) || [],
+          badges: profile.badges || [],
+          donationCount: profile.donationCount || 0,
+          requestCount: profile.requestCount || 0,
+          donationChange: stats.donationChange || "+0%",
+          requestChange: stats.requestChange || "+0%",
+          transactionChange: stats.transactionChange || "+0%",
+          impactChange: stats.impactChange || "+0%",
+        });
+        setFormData({
+          email: profile.email || "",
+          phone: profile.phone || "",
+          otp: "",
+          currentPassword: "",
+          newPassword: "",
+          confirmNewPassword: "",
         });
         setError("");
       } catch (err) {
@@ -200,21 +214,29 @@ const Profile = () => {
     return types.join(" & ");
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleUpdateEmail = async () => {
     try {
       setError("");
       setSuccess("");
       const token = localStorage.getItem("token");
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-
+      if (
+        !formData.email ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      ) {
+        setError("Please provide a valid email address");
+        return;
+      }
       const response = await axios.post(
         "http://localhost:5000/api/user/update-email",
-        { newEmail },
-        config
+        { newEmail: formData.email },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setOtpSent(true);
+      setIsEditing((prev) => ({ ...prev, email: true }));
       setSuccess(response.data.message || "OTP sent to your new email");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to send OTP");
@@ -226,20 +248,18 @@ const Profile = () => {
       setError("");
       setSuccess("");
       const token = localStorage.getItem("token");
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-
+      if (!formData.otp || !/^\d{6}$/.test(formData.otp)) {
+        setError("Please provide a valid 6-digit OTP");
+        return;
+      }
       const response = await axios.post(
         "http://localhost:5000/api/user/verify-update-email",
-        { newEmail, otp },
-        config
+        { newEmail: formData.email, otp: formData.otp },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setUserData((prev) => ({ ...prev, email: newEmail }));
-      setOtpSent(false);
-      setNewEmail("");
-      setOtp("");
-      setEditingEmail(false);
+      setUserData((prev) => ({ ...prev, email: formData.email }));
+      setFormData((prev) => ({ ...prev, otp: "" }));
+      setIsEditing((prev) => ({ ...prev, email: false }));
       setSuccess(response.data.message || "Email updated successfully");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to verify OTP");
@@ -251,18 +271,17 @@ const Profile = () => {
       setError("");
       setSuccess("");
       const token = localStorage.getItem("token");
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-
+      if (!formData.phone || !/^\+?[1-9]\d{1,14}$/.test(formData.phone)) {
+        setError("Please provide a valid phone number (e.g., +1234567890)");
+        return;
+      }
       const response = await axios.post(
         "http://localhost:5000/api/user/update-phone",
-        { newPhone },
-        config
+        { newPhone: formData.phone },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setUserData((prev) => ({ ...prev, phone: newPhone }));
-      setEditingPhone(false);
-      setNewPhone("");
+      setUserData((prev) => ({ ...prev, phone: formData.phone }));
+      setIsEditing((prev) => ({ ...prev, phone: false }));
       setSuccess(response.data.message || "Phone number updated successfully");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to update phone number");
@@ -273,28 +292,39 @@ const Profile = () => {
     try {
       setError("");
       setSuccess("");
-      if (newPassword.length < 6) {
+      if (
+        !formData.currentPassword ||
+        !formData.newPassword ||
+        !formData.confirmNewPassword
+      ) {
+        setError("Please fill in all password fields");
+        return;
+      }
+      if (formData.newPassword.length < 6) {
         setError("New password must be at least 6 characters long");
         return;
       }
-      if (newPassword !== confirmNewPassword) {
+      if (formData.newPassword !== formData.confirmNewPassword) {
         setError("New passwords do not match");
         return;
       }
       const token = localStorage.getItem("token");
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-
       const response = await axios.post(
         "http://localhost:5000/api/user/update-password",
-        { currentPassword, newPassword, confirmNewPassword },
-        config
+        {
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+          confirmNewPassword: formData.confirmNewPassword,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setEditingPassword(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
+      setFormData((prev) => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      }));
+      setIsEditing((prev) => ({ ...prev, password: false }));
       setSuccess(response.data.message || "Password updated successfully");
     } catch (err) {
       setError(err.response?.data?.error || "Failed to update password");
@@ -315,23 +345,23 @@ const Profile = () => {
           resourceType: "image",
           clientAllowedFormats: ["png", "jpg", "jpeg"],
           maxFileSize: 5000000, // 5MB
+          cropping: true,
+          folder: "meditrust_profiles",
         },
         async (error, result) => {
           if (error) {
             setError("Failed to upload image");
+            console.error("Cloudinary Upload Error:", error);
             return;
           }
           if (result.event === "success") {
             const imageUrl = result.info.secure_url;
             const token = localStorage.getItem("token");
-            const config = {
-              headers: { Authorization: `Bearer ${token}` },
-            };
             try {
               const response = await axios.post(
                 "http://localhost:5000/api/user/update-profile-picture",
                 { profilePicture: imageUrl },
-                config
+                { headers: { Authorization: `Bearer ${token}` } }
               );
               setUserData((prev) => ({ ...prev, profilePicture: imageUrl }));
               setSuccess(
@@ -536,50 +566,63 @@ const Profile = () => {
                     </label>
                     {isLoading ? (
                       <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : editingEmail ? (
+                    ) : isEditing.email ? (
                       <div className="space-y-3">
                         <div className="flex gap-2">
                           <input
                             type="email"
-                            value={newEmail}
-                            onChange={(e) => setNewEmail(e.target.value)}
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
                             placeholder="Enter new email"
                             className="flex-1 bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                           />
                           <button
                             onClick={handleUpdateEmail}
-                            disabled={!newEmail}
+                            disabled={!formData.email}
                             className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Send OTP
                           </button>
                           <button
                             onClick={() => {
-                              setEditingEmail(false);
-                              setNewEmail("");
-                              setOtpSent(false);
+                              setIsEditing((prev) => ({
+                                ...prev,
+                                email: false,
+                              }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                email: userData.email,
+                                otp: "",
+                              }));
                             }}
                             className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
                           >
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                        {otpSent && (
+                        {isEditing.email && (
                           <div className="flex gap-2">
                             <div className="relative flex-1">
                               <input
-                                type={showOtp ? "text" : "password"}
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
+                                type={showPassword.otp ? "text" : "password"}
+                                name="otp"
+                                value={formData.otp}
+                                onChange={handleInputChange}
                                 placeholder="Enter OTP"
                                 className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                               />
                               <button
                                 type="button"
-                                onClick={() => setShowOtp(!showOtp)}
+                                onClick={() =>
+                                  setShowPassword((prev) => ({
+                                    ...prev,
+                                    otp: !prev.otp,
+                                  }))
+                                }
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                               >
-                                {showOtp ? (
+                                {showPassword.otp ? (
                                   <EyeOff className="w-4 h-4" />
                                 ) : (
                                   <Eye className="w-4 h-4" />
@@ -588,7 +631,7 @@ const Profile = () => {
                             </div>
                             <button
                               onClick={handleVerifyEmailOtp}
-                              disabled={!otp}
+                              disabled={!formData.otp}
                               className="bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Verify
@@ -609,7 +652,9 @@ const Profile = () => {
                             <Copy className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => setEditingEmail(true)}
+                            onClick={() =>
+                              setIsEditing((prev) => ({ ...prev, email: true }))
+                            }
                             className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
                           >
                             <Edit className="w-4 h-4" />
@@ -627,26 +672,30 @@ const Profile = () => {
                     </label>
                     {isLoading ? (
                       <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : editingPhone ? (
+                    ) : isEditing.phone ? (
                       <div className="flex gap-2">
                         <input
                           type="tel"
-                          value={newPhone}
-                          onChange={(e) => setNewPhone(e.target.value)}
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
                           placeholder="Enter new phone number"
                           className="flex-1 bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                         />
                         <button
                           onClick={handleUpdatePhone}
-                          disabled={!newPhone}
+                          disabled={!formData.phone}
                           className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Save className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => {
-                            setEditingPhone(false);
-                            setNewPhone("");
+                            setIsEditing((prev) => ({ ...prev, phone: false }));
+                            setFormData((prev) => ({
+                              ...prev,
+                              phone: userData.phone,
+                            }));
                           }}
                           className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
                         >
@@ -668,7 +717,9 @@ const Profile = () => {
                             </button>
                           )}
                           <button
-                            onClick={() => setEditingPhone(true)}
+                            onClick={() =>
+                              setIsEditing((prev) => ({ ...prev, phone: true }))
+                            }
                             className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
                           >
                             <Edit className="w-4 h-4" />
@@ -727,24 +778,28 @@ const Profile = () => {
                     </label>
                     {isLoading ? (
                       <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : editingPassword ? (
+                    ) : isEditing.password ? (
                       <div className="space-y-3">
                         <div className="relative">
                           <input
-                            type={showCurrentPassword ? "text" : "password"}
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            type={showPassword.current ? "text" : "password"}
+                            name="currentPassword"
+                            value={formData.currentPassword}
+                            onChange={handleInputChange}
                             placeholder="Current Password"
                             className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                           />
                           <button
                             type="button"
                             onClick={() =>
-                              setShowCurrentPassword(!showCurrentPassword)
+                              setShowPassword((prev) => ({
+                                ...prev,
+                                current: !prev.current,
+                              }))
                             }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                           >
-                            {showCurrentPassword ? (
+                            {showPassword.current ? (
                               <EyeOff className="w-4 h-4" />
                             ) : (
                               <Eye className="w-4 h-4" />
@@ -753,18 +808,24 @@ const Profile = () => {
                         </div>
                         <div className="relative">
                           <input
-                            type={showNewPassword ? "text" : "password"}
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
+                            type={showPassword.new ? "text" : "password"}
+                            name="newPassword"
+                            value={formData.newPassword}
+                            onChange={handleInputChange}
                             placeholder="New Password"
                             className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                           />
                           <button
                             type="button"
-                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            onClick={() =>
+                              setShowPassword((prev) => ({
+                                ...prev,
+                                new: !prev.new,
+                              }))
+                            }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                           >
-                            {showNewPassword ? (
+                            {showPassword.new ? (
                               <EyeOff className="w-4 h-4" />
                             ) : (
                               <Eye className="w-4 h-4" />
@@ -773,22 +834,24 @@ const Profile = () => {
                         </div>
                         <div className="relative">
                           <input
-                            type={showConfirmNewPassword ? "text" : "password"}
-                            value={confirmNewPassword}
-                            onChange={(e) =>
-                              setConfirmNewPassword(e.target.value)
-                            }
+                            type={showPassword.confirm ? "text" : "password"}
+                            name="confirmNewPassword"
+                            value={formData.confirmNewPassword}
+                            onChange={handleInputChange}
                             placeholder="Confirm New Password"
                             className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                           />
                           <button
                             type="button"
                             onClick={() =>
-                              setShowConfirmNewPassword(!showConfirmNewPassword)
+                              setShowPassword((prev) => ({
+                                ...prev,
+                                confirm: !prev.confirm,
+                              }))
                             }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                           >
-                            {showConfirmNewPassword ? (
+                            {showPassword.confirm ? (
                               <EyeOff className="w-4 h-4" />
                             ) : (
                               <Eye className="w-4 h-4" />
@@ -799,9 +862,9 @@ const Profile = () => {
                           <button
                             onClick={handleUpdatePassword}
                             disabled={
-                              !currentPassword ||
-                              !newPassword ||
-                              !confirmNewPassword
+                              !formData.currentPassword ||
+                              !formData.newPassword ||
+                              !formData.confirmNewPassword
                             }
                             className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                           >
@@ -809,10 +872,16 @@ const Profile = () => {
                           </button>
                           <button
                             onClick={() => {
-                              setEditingPassword(false);
-                              setCurrentPassword("");
-                              setNewPassword("");
-                              setConfirmNewPassword("");
+                              setIsEditing((prev) => ({
+                                ...prev,
+                                password: false,
+                              }));
+                              setFormData((prev) => ({
+                                ...prev,
+                                currentPassword: "",
+                                newPassword: "",
+                                confirmNewPassword: "",
+                              }));
                             }}
                             className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
                           >
@@ -824,7 +893,12 @@ const Profile = () => {
                       <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
                         <p className="font-semibold text-gray-900">••••••••</p>
                         <button
-                          onClick={() => setEditingPassword(true)}
+                          onClick={() =>
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              password: true,
+                            }))
+                          }
                           className="p-1 text-gray-500 hover:text-[#19183B] transition-colors opacity-0 group-hover:opacity-100"
                         >
                           <Edit className="w-4 h-4" />
@@ -947,7 +1021,7 @@ const Profile = () => {
                           </div>
                           <div>
                             <h3 className="font-bold text-gray-900 group-hover:text-[#19183B] transition-colors duration-300">
-                              {badge.title}
+                              {badge.certificateId}
                             </h3>
                             <p className="text-sm text-gray-600">
                               {badge.description}
@@ -956,10 +1030,11 @@ const Profile = () => {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-500">
-                            Earned {new Date(badge.date).toLocaleDateString()}
+                            Earned{" "}
+                            {new Date(badge.issuedAt).toLocaleDateString()}
                           </span>
                           <a
-                            href={badge.certificateLink}
+                            href={badge.url}
                             className="text-sm text-[#19183B] font-semibold hover:underline flex items-center gap-1"
                             target="_blank"
                             rel="noopener noreferrer"
@@ -1008,7 +1083,7 @@ const Profile = () => {
                           {userData.livesTouched}
                         </p>
                         <p className="text-sm text-gray-600">
-                          People helped through your donations
+                          Change: {userData.impactChange}
                         </p>
                       </div>
                     </div>
@@ -1023,7 +1098,7 @@ const Profile = () => {
                           {userData.trustScore}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Community reliability rating
+                          Change: {userData.transactionChange}
                         </p>
                       </div>
                     </div>
@@ -1035,14 +1110,14 @@ const Profile = () => {
                       <div>
                         <h3 className="font-bold text-lg">Reputation Level</h3>
                         <p className="text-2xl font-bold text-[#19183B]">
-                          {userData.badges.length > 5
+                          {userData.donationCount > 10
                             ? "Expert"
-                            : userData.badges.length > 2
+                            : userData.donationCount > 5
                             ? "Trusted"
                             : "New Member"}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Based on your contributions
+                          Based on {userData.donationCount} donations
                         </p>
                       </div>
                     </div>
@@ -1109,7 +1184,9 @@ const Profile = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => setEditingPassword(true)}
+                      onClick={() =>
+                        setIsEditing((prev) => ({ ...prev, password: true }))
+                      }
                       className="text-[#19183B] font-medium hover:underline text-sm"
                     >
                       Change
