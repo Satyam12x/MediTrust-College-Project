@@ -102,6 +102,7 @@ const Profile = () => {
     otp: false,
   });
   const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -229,10 +230,16 @@ const Profile = () => {
     }
 
     try {
-      setIsLoading(true);
+      setIsUploading(true);
       setError("");
       setSuccess("");
       const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token not found. Please log in again.");
+        navigate("/login");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("profilePicture", file);
 
@@ -255,10 +262,14 @@ const Profile = () => {
       setFile(null);
     } catch (err) {
       console.error("Profile Picture Upload Error:", err.response?.data);
-      setError(err.response?.data?.error || "Failed to upload profile picture");
+      const errorMessage =
+        err.response?.status === 404
+          ? "Profile picture upload endpoint not found. Please check the server configuration."
+          : err.response?.data?.error || "Failed to upload profile picture";
+      setError(errorMessage);
       setSuccess("");
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -531,12 +542,12 @@ const Profile = () => {
                         {file && (
                           <button
                             onClick={handleUploadProfilePicture}
-                            disabled={isLoading}
+                            disabled={isUploading}
                             className={`w-full bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity ${
-                              isLoading ? "opacity-50 cursor-not-allowed" : ""
+                              isUploading ? "opacity-50 cursor-not-allowed" : ""
                             }`}
                           >
-                            {isLoading
+                            {isUploading
                               ? "Uploading..."
                               : "Upload Profile Picture"}
                           </button>
