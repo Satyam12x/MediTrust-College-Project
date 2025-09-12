@@ -32,11 +32,22 @@ import {
 
 // Cloudinary widget script (loaded dynamically)
 const loadCloudinaryScript = () => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    if (window.cloudinary) {
+      resolve(window.cloudinary);
+      return;
+    }
     const script = document.createElement("script");
     script.src = "https://widget.cloudinary.com/v2.0/global/all.js";
     script.async = true;
-    script.onload = () => resolve(window.cloudinary);
+    script.onload = () => {
+      if (window.cloudinary) {
+        resolve(window.cloudinary);
+      } else {
+        reject(new Error("Cloudinary script loaded but window.cloudinary is undefined"));
+      }
+    };
+    script.onerror = () => reject(new Error("Failed to load Cloudinary script"));
     document.body.appendChild(script);
   });
 };
@@ -224,10 +235,7 @@ const Profile = () => {
       setError("");
       setSuccess("");
       const token = localStorage.getItem("token");
-      if (
-        !formData.email ||
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-      ) {
+      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         setError("Please provide a valid email address");
         return;
       }
@@ -335,11 +343,20 @@ const Profile = () => {
     try {
       setError("");
       setSuccess("");
+      // Fetch Cloudinary config from backend
+      const configResponse = await axios.get(
+        "http://localhost:5000/api/config/cloudinary"
+      );
+      const { cloudName, uploadPreset } = configResponse.data;
+      if (!cloudName || !uploadPreset) {
+        throw new Error("Cloudinary configuration not received from server");
+      }
+
       const cloudinary = await loadCloudinaryScript();
       const widget = cloudinary.createUploadWidget(
         {
-          cloudName: process.env.REACT_APP_CLOUDINARY_CLOUD_NAME,
-          uploadPreset: "meditrust_profile",
+          cloudName,
+          uploadPreset,
           sources: ["local", "camera"],
           multiple: false,
           resourceType: "image",
@@ -350,8 +367,10 @@ const Profile = () => {
         },
         async (error, result) => {
           if (error) {
-            setError("Failed to upload image");
-            console.error("Cloudinary Upload Error:", error);
+            console.error("Cloudinary Widget Error:", error);
+            setError(
+              `Failed to upload image: ${error.message || "Unknown error"}`
+            );
             return;
           }
           if (result.event === "success") {
@@ -368,6 +387,7 @@ const Profile = () => {
                 response.data.message || "Profile picture updated successfully"
               );
             } catch (err) {
+              console.error("Profile Picture Update Error:", err.response?.data);
               setError(
                 err.response?.data?.error || "Failed to update profile picture"
               );
@@ -377,7 +397,8 @@ const Profile = () => {
       );
       widget.open();
     } catch (err) {
-      setError("Failed to initialize image upload");
+      console.error("Image Upload Initialization Error:", err);
+      setError(`Failed to initialize image upload: ${err.message}`);
     }
   };
 
@@ -442,7 +463,10 @@ const Profile = () => {
               </p>
             </div>
             <div className="flex gap-4">
-              <button className="flex items-center gap-2 bg-gray-100 border border-gray-200 py-2.5 px-5 rounded-xl hover:border-[#19183B] transition-all duration-300 shadow-sm">
+              <button
+                className="flex items-center gap-2 bg-gray-100 border border-gray-200 py-2.5 px-5 rounded-xl hover:border-[#19183B] transition-all duration-300 shadow-sm"
+                onClick={() => navigate("/settings")}
+              >
                 <Settings className="w-5 h-5 text-[#19183B]" />
                 <span>Settings</span>
               </button>
@@ -508,6 +532,9 @@ const Profile = () => {
                             src={userData.profilePicture}
                             alt="Profile"
                             className="w-12 h-12 rounded-full object-cover"
+                            onError={(e) =>
+                              (e.target.src = "/images/placeholder.png")
+                            }
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full bg-gray-400 flex items-center justify-center text-white">
@@ -610,7 +637,7 @@ const Profile = () => {
                                 value={formData.otp}
                                 onChange={handleInputChange}
                                 placeholder="Enter OTP"
-                                className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                                className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                               />
                               <button
                                 type="button"
@@ -620,7 +647,7 @@ const Profile = () => {
                                     otp: !prev.otp,
                                   }))
                                 }
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
                               >
                                 {showPassword.otp ? (
                                   <EyeOff className="w-4 h-4" />
@@ -632,9 +659,9 @@ const Profile = () => {
                             <button
                               onClick={handleVerifyEmailOtp}
                               disabled={!formData.otp}
-                              className="bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Verify
+                              Verify OTP
                             </button>
                           </div>
                         )}
@@ -644,7 +671,7 @@ const Profile = () => {
                         <p className="font-semibold text-gray-900">
                           {userData.email}
                         </p>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => copyToClipboard(userData.email)}
                             className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
@@ -705,9 +732,9 @@ const Profile = () => {
                     ) : (
                       <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
                         <p className="font-semibold text-gray-900">
-                          {userData.phone || "Not set"}
+                          {userData.phone || "Not provided"}
                         </p>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           {userData.phone && (
                             <button
                               onClick={() => copyToClipboard(userData.phone)}
@@ -729,30 +756,6 @@ const Profile = () => {
                     )}
                   </div>
 
-                  {/* Join Date */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      Member Since
-                    </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300">
-                        <p className="font-semibold text-gray-900">
-                          {new Date(userData.joinDate).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
                   {/* Location */}
                   <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
@@ -770,457 +773,274 @@ const Profile = () => {
                     )}
                   </div>
 
-                  {/* Password Update */}
-                  <div className="space-y-2 col-span-2">
+                  {/* Join Date */}
+                  <div className="space-y-2">
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Lock className="w-4 h-4" />
-                      Password
+                      <Calendar className="w-4 h-4" />
+                      Join Date
                     </label>
                     {isLoading ? (
                       <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : isEditing.password ? (
-                      <div className="space-y-3">
-                        <div className="relative">
-                          <input
-                            type={showPassword.current ? "text" : "password"}
-                            name="currentPassword"
-                            value={formData.currentPassword}
-                            onChange={handleInputChange}
-                            placeholder="Current Password"
-                            className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowPassword((prev) => ({
-                                ...prev,
-                                current: !prev.current,
-                              }))
-                            }
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          >
-                            {showPassword.current ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
-                        <div className="relative">
-                          <input
-                            type={showPassword.new ? "text" : "password"}
-                            name="newPassword"
-                            value={formData.newPassword}
-                            onChange={handleInputChange}
-                            placeholder="New Password"
-                            className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowPassword((prev) => ({
-                                ...prev,
-                                new: !prev.new,
-                              }))
-                            }
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          >
-                            {showPassword.new ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
-                        <div className="relative">
-                          <input
-                            type={showPassword.confirm ? "text" : "password"}
-                            name="confirmNewPassword"
-                            value={formData.confirmNewPassword}
-                            onChange={handleInputChange}
-                            placeholder="Confirm New Password"
-                            className="w-full bg-white border border-gray-300 rounded-lg p-3 pr-10 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                          />
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowPassword((prev) => ({
-                                ...prev,
-                                confirm: !prev.confirm,
-                              }))
-                            }
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                          >
-                            {showPassword.confirm ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={handleUpdatePassword}
-                            disabled={
-                              !formData.currentPassword ||
-                              !formData.newPassword ||
-                              !formData.confirmNewPassword
-                            }
-                            className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Update Password
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsEditing((prev) => ({
-                                ...prev,
-                                password: false,
-                              }));
-                              setFormData((prev) => ({
-                                ...prev,
-                                currentPassword: "",
-                                newPassword: "",
-                                confirmNewPassword: "",
-                              }));
-                            }}
-                            className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
                     ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
-                        <p className="font-semibold text-gray-900">••••••••</p>
+                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300">
+                        <p className="font-semibold text-gray-900">
+                          {new Date(userData.joinDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Verification Status */}
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                      <UserCheck className="w-4 h-4" />
+                      Verification Status
+                    </label>
+                    {isLoading ? (
+                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
+                    ) : (
+                      <div
+                        className={`rounded-lg p-3 border ${getVerificationStatusColor(
+                          userData.status
+                        )}`}
+                      >
+                        <p className="font-semibold capitalize">
+                          {userData.status}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </section>
+
+              {/* Password Update */}
+              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                <h2 className="text-2xl font-bold mb-6">Change Password</h2>
+                {isEditing.password ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                        <Lock className="w-4 h-4" />
+                        Current Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword.current ? "text" : "password"}
+                          name="currentPassword"
+                          value={formData.currentPassword}
+                          onChange={handleInputChange}
+                          placeholder="Enter current password"
+                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                        />
                         <button
+                          type="button"
                           onClick={() =>
-                            setIsEditing((prev) => ({
+                            setShowPassword((prev) => ({
                               ...prev,
-                              password: true,
+                              current: !prev.current,
                             }))
                           }
-                          className="p-1 text-gray-500 hover:text-[#19183B] transition-colors opacity-0 group-hover:opacity-100"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
                         >
-                          <Edit className="w-4 h-4" />
+                          {showPassword.current ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </section>
-
-              {/* Verification Status */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-2xl font-bold mb-6">
-                  Account Verification
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`p-2 rounded-full ${
-                          userData.status === "completed"
-                            ? "bg-green-100"
-                            : "bg-yellow-100"
-                        }`}
-                      >
-                        <AlertCircle
-                          className={`w-5 h-5 ${
-                            userData.status === "completed"
-                              ? "text-green-600"
-                              : "text-yellow-600"
-                          }`}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                        <Lock className="w-4 h-4" />
+                        New Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword.new ? "text" : "password"}
+                          name="newPassword"
+                          value={formData.newPassword}
+                          onChange={handleInputChange}
+                          placeholder="Enter new password"
+                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                         />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">OTP Verification</h3>
-                        <p className="text-sm text-gray-600">
-                          Email and phone verification
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowPassword((prev) => ({
+                              ...prev,
+                              new: !prev.new,
+                            }))
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
+                        >
+                          {showPassword.new ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
                       </div>
                     </div>
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getVerificationStatusColor(
-                        userData.status
-                      )}`}
-                    >
-                      {userData.status === "completed" ? "Verified" : "Pending"}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`p-2 rounded-full ${
-                          userData.kycVerified ? "bg-green-100" : "bg-gray-100"
-                        }`}
-                      >
-                        <Shield
-                          className={`w-5 h-5 ${
-                            userData.kycVerified
-                              ? "text-green-600"
-                              : "text-gray-600"
-                          }`}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                        <Lock className="w-4 h-4" />
+                        Confirm New Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword.confirm ? "text" : "password"}
+                          name="confirmNewPassword"
+                          value={formData.confirmNewPassword}
+                          onChange={handleInputChange}
+                          placeholder="Confirm new password"
+                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                         />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">KYC Verification</h3>
-                        <p className="text-sm text-gray-600">
-                          Identity verification
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowPassword((prev) => ({
+                              ...prev,
+                              confirm: !prev.confirm,
+                            }))
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
+                        >
+                          {showPassword.confirm ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
                       </div>
                     </div>
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${
-                        userData.kycVerified
-                          ? "bg-green-100 text-green-600 border-green-200"
-                          : "bg-gray-100 text-gray-600 border-gray-200"
-                      }`}
-                    >
-                      {userData.kycVerified ? "KYC Verified" : "Not Verified"}
-                    </span>
-                    {!userData.kycVerified && (
-                      <button className="text-sm text-[#19183B] font-medium hover:underline">
-                        Complete KYC Verification →
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleUpdatePassword}
+                        className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity"
+                      >
+                        Update Password
                       </button>
-                    )}
+                      <button
+                        onClick={() => {
+                          setIsEditing((prev) => ({ ...prev, password: false }));
+                          setFormData((prev) => ({
+                            ...prev,
+                            currentPassword: "",
+                            newPassword: "",
+                            confirmNewPassword: "",
+                          }));
+                        }}
+                        className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <button
+                    onClick={() =>
+                      setIsEditing((prev) => ({ ...prev, password: true }))
+                    }
+                    className="bg-gray-200 text-gray-900 px-4 py-3 rounded-lg border border-gray-300 hover:bg-gray-300 transition-colors"
+                  >
+                    Change Password
+                  </button>
+                )}
+              </section>
+            </div>
+
+            {/* Sidebar Stats and Badges */}
+            <div className="space-y-8">
+              {/* Impact Stats */}
+              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                <h2 className="text-2xl font-bold mb-6">Your Impact</h2>
+                {isLoading ? (
+                  <SkeletonCard />
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <Heart className="w-10 h-10 text-[#19183B] bg-[#19183B]/10 p-2 rounded-full" />
+                      <div>
+                        <p className="text-sm text-gray-600">Lives Helped</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {userData.livesTouched}
+                        </p>
+                        <p className="text-sm text-green-600">
+                          {userData.impactChange}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <TrendingUp className="w-10 h-10 text-[#19183B] bg-[#19183B]/10 p-2 rounded-full" />
+                      <div>
+                        <p className="text-sm text-gray-600">Total Donations</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {userData.donationCount}
+                        </p>
+                        <p className="text-sm text-green-600">
+                          {userData.donationChange}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Shield className="w-10 h-10 text-[#19183B] bg-[#19183B]/10 p-2 rounded-full" />
+                      <div>
+                        <p className="text-sm text-gray-600">Trust Score</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {userData.trustScore}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </section>
 
-              {/* Achievements & Badges */}
+              {/* Badges */}
               <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Achievements & Badges</h2>
-                  <span className="text-sm text-gray-600">
-                    {userData.badges.length} badge
-                    {userData.badges.length !== 1 ? "s" : ""} earned
-                  </span>
-                </div>
-
+                <h2 className="text-2xl font-bold mb-6">Badges</h2>
                 {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <SkeletonBadge key={i} />
-                    ))}
+                  <div className="space-y-4">
+                    <SkeletonBadge />
+                    <SkeletonBadge />
                   </div>
                 ) : userData.badges.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     {userData.badges.map((badge, index) => (
                       <div
                         key={index}
-                        className="bg-gray-200 rounded-xl p-4 border border-gray-300 hover:border-[#19183B] transition-all duration-300 group hover:scale-[1.02] shadow-sm"
+                        className="bg-gray-200 rounded-xl p-4 border border-gray-300"
                       >
                         <div className="flex items-center gap-3 mb-3">
-                          <div
-                            className={`p-2 rounded-full bg-gradient-to-r ${getBadgeColor(
+                          <Star
+                            className={`w-10 h-10 bg-gradient-to-br ${getBadgeColor(
                               badge.type
-                            )} shadow-md group-hover:scale-110 transition-transform duration-300`}
-                          >
-                            <Award className="w-6 h-6 text-white" />
-                          </div>
+                            )} text-white p-2 rounded-full`}
+                          />
                           <div>
-                            <h3 className="font-bold text-gray-900 group-hover:text-[#19183B] transition-colors duration-300">
-                              {badge.certificateId}
-                            </h3>
+                            <p className="font-semibold text-gray-900">
+                              {badge.type.charAt(0).toUpperCase() +
+                                badge.type.slice(1)}{" "}
+                              Badge
+                            </p>
                             <p className="text-sm text-gray-600">
                               {badge.description}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">
-                            Earned{" "}
-                            {new Date(badge.issuedAt).toLocaleDateString()}
-                          </span>
-                          <a
-                            href={badge.url}
-                            className="text-sm text-[#19183B] font-semibold hover:underline flex items-center gap-1"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            View Certificate
-                            <Download className="w-3 h-3" />
-                          </a>
-                        </div>
+                        <button
+                          onClick={() => copyToClipboard(badge.certificateId)}
+                          className="w-full bg-gray-300 text-gray-900 py-2 rounded-lg hover:bg-gray-400 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Copy className="w-4 h-4" />
+                          Copy Certificate ID
+                        </button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                      No badges yet
-                    </h3>
-                    <p className="text-gray-500">
-                      Keep donating to earn rewards and recognition!
-                    </p>
-                  </div>
+                  <p className="text-gray-600">No badges earned yet.</p>
                 )}
-              </section>
-            </div>
-
-            {/* Impact Stats Sidebar */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Impact Overview */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Your Impact</h2>
-                {isLoading ? (
-                  <div className="space-y-6">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <SkeletonCard key={i} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-green-100 text-green-600 rounded-full w-12 h-12 flex-shrink-0 flex items-center justify-center shadow-md">
-                        <Heart className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">Lives Touched</h3>
-                        <p className="text-2xl font-bold text-[#19183B]">
-                          {userData.livesTouched}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Change: {userData.impactChange}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="bg-blue-100 text-blue-600 rounded-full w-12 h-12 flex-shrink-0 flex items-center justify-center shadow-md">
-                        <TrendingUp className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">Trust Score</h3>
-                        <p className="text-2xl font-bold text-[#19183B]">
-                          {userData.trustScore}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Change: {userData.transactionChange}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex-shrink-0 flex items-center justify-center shadow-md">
-                        <Star className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">Reputation Level</h3>
-                        <p className="text-2xl font-bold text-[#19183B]">
-                          {userData.donationCount > 10
-                            ? "Expert"
-                            : userData.donationCount > 5
-                            ? "Trusted"
-                            : "New Member"}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Based on {userData.donationCount} donations
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <button className="w-full bg-[#19183B] text-white py-3 px-4 rounded-lg hover:shadow-md hover:shadow-[#19183B]/50 transition-all duration-300 hover:scale-105 font-medium">
-                    View Detailed Report
-                  </button>
-                </div>
-              </section>
-
-              {/* Quick Actions */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-                <div className="space-y-3">
-                  <button className="w-full bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-[#19183B] text-gray-900 py-3 px-4 rounded-lg transition-all duration-300 text-left flex items-center gap-3">
-                    <Bell className="w-5 h-5 text-[#19183B]" />
-                    <div>
-                      <p className="font-medium">Notification Settings</p>
-                      <p className="text-sm text-gray-600">
-                        Manage your alerts
-                      </p>
-                    </div>
-                  </button>
-
-                  <button className="w-full bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-[#19183B] text-gray-900 py-3 px-4 rounded-lg transition-all duration-300 text-left flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-[#19183B]" />
-                    <div>
-                      <p className="font-medium">Privacy Settings</p>
-                      <p className="text-sm text-gray-600">
-                        Control data visibility
-                      </p>
-                    </div>
-                  </button>
-
-                  {!userData.kycVerified && (
-                    <button className="w-full bg-gray-200 hover:bg-gray-300 border border-gray-300 hover:border-[#19183B] text-gray-900 py-3 px-4 rounded-lg transition-all duration-300 text-left flex items-center gap-3">
-                      <UserCheck className="w-5 h-5 text-[#19183B]" />
-                      <div>
-                        <p className="font-medium">Complete KYC</p>
-                        <p className="text-sm text-gray-600">
-                          Verify your identity
-                        </p>
-                      </div>
-                    </button>
-                  )}
-                </div>
-              </section>
-
-              {/* Account Security */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-bold mb-4">Account Security</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Lock className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium">Password</p>
-                        <p className="text-sm text-gray-600">
-                          Last updated 30 days ago
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() =>
-                        setIsEditing((prev) => ({ ...prev, password: true }))
-                      }
-                      className="text-[#19183B] font-medium hover:underline text-sm"
-                    >
-                      Change
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Shield className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium">Two-Factor Auth</p>
-                        <p className="text-sm text-gray-600">Not enabled</p>
-                      </div>
-                    </div>
-                    <button className="text-[#19183B] font-medium hover:underline text-sm">
-                      Enable
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Eye className="w-5 h-5 text-gray-600" />
-                      <div>
-                        <p className="font-medium">Login History</p>
-                        <p className="text-sm text-gray-600">
-                          View recent activity
-                        </p>
-                      </div>
-                    </div>
-                    <button className="text-[#19183B] font-medium hover:underline text-sm">
-                      View
-                    </button>
-                  </div>
-                </div>
               </section>
             </div>
           </div>

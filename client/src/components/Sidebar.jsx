@@ -1,5 +1,5 @@
-// Updated Sidebar.jsx
 import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Upload,
   Truck,
@@ -14,14 +14,14 @@ import {
   User,
 } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const [userData, setUserData] = useState({
-    name: "User",
+    firstName: "",
+    lastName: "",
     userType: "Donor",
     kycVerified: false,
-    profilePicture: "https://via.placeholder.com/48",
+    profilePicture: "",
     status: "pending",
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -29,17 +29,58 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   const navigate = useNavigate();
 
   const navItems = [
-    { id: "dashboard", icon: TrendingUp, label: "Dashboard", active: true },
-    { id: "upload", icon: Upload, label: "Upload Medicine" },
-    { id: "medicines", icon: Package, label: "Available Medicines" },
-    { id: "tracking", icon: Truck, label: "Request Tracking" },
-    { id: "history", icon: History, label: "Donation History" },
-    { id: "notifications", icon: Bell, label: "Notifications" },
-    { id: "kyc", icon: CheckCircle, label: "KYC Verification" },
-    { id: "certificates", icon: Award, label: "Certificates" },
+    {
+      id: "dashboard",
+      icon: TrendingUp,
+      label: "Dashboard",
+      path: "/dashboard",
+    },
+    { id: "upload", icon: Upload, label: "Upload Medicine", path: "/upload" },
+    {
+      id: "medicines",
+      icon: Package,
+      label: "Available Medicines",
+      path: "/medicines",
+    },
+    {
+      id: "tracking",
+      icon: Truck,
+      label: "Request Tracking",
+      path: "/tracking",
+    },
+    {
+      id: "history",
+      icon: History,
+      label: "Donation History",
+      path: "/history",
+    },
+    {
+      id: "notifications",
+      icon: Bell,
+      label: "Notifications",
+      path: "/notifications",
+    },
+    { id: "kyc", icon: CheckCircle, label: "KYC Verification", path: "/kyc" },
+    {
+      id: "certificates",
+      icon: Award,
+      label: "Certificates",
+      path: "/certificates",
+    },
   ];
 
-  // Fetch user profile data
+  // Skeleton loader for user info
+  const SkeletonUserInfo = () => (
+    <div className="flex items-center gap-3 mb-8">
+      <div className="rounded-full w-12 h-12 bg-gray-300 animate-pulse"></div>
+      <div className="flex-1">
+        <div className="h-5 bg-gray-300 rounded animate-pulse mb-2 w-24"></div>
+        <div className="h-4 bg-gray-300 rounded animate-pulse w-16 mb-1"></div>
+        <div className="h-3 bg-gray-300 rounded animate-pulse w-20"></div>
+      </div>
+    </div>
+  );
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -68,14 +109,11 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         }
 
         setUserData({
-          name:
-            profile.firstName && profile.lastName
-              ? `${profile.firstName} ${profile.lastName}`
-              : profile.email || "User",
+          firstName: profile.firstName || "",
+          lastName: profile.lastName || "",
           userType: formatUserType(profile.userType),
           kycVerified: profile.kycVerified,
-          profilePicture:
-            profile.profilePicture || "https://via.placeholder.com/48",
+          profilePicture: profile.profilePicture || "",
           status: profile.status,
         });
         setError("");
@@ -101,7 +139,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     fetchUserProfile();
   }, [navigate]);
 
-  // Format userType for display
   const formatUserType = (userType) => {
     if (!userType) return "Donor";
     const types = userType.split(",").map((type) => {
@@ -119,28 +156,15 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     return types.join(" & ");
   };
 
-  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
-  // Skeleton loader for user info
-  const SkeletonUserInfo = () => (
-    <div className="flex items-center gap-3 mb-8">
-      <div className="rounded-full size-12 bg-gray-300 animate-pulse"></div>
-      <div className="flex-1">
-        <div className="h-5 bg-gray-300 rounded animate-pulse mb-2"></div>
-        <div className="h-4 bg-gray-300 rounded animate-pulse w-3/4 mb-1"></div>
-        <div className="h-3 bg-gray-300 rounded animate-pulse w-1/2"></div>
-      </div>
-    </div>
-  );
-
   if (error && userData.status !== "completed") {
     return (
-      <div className="min-h-screen bg-gray-100 text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif] flex items-center justify-center">
-        <div className="text-center p-8 bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div className="min-h-screen bg-white text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif] flex items-center justify-center">
+        <div className="text-center p-8 bg-gray-100 rounded-xl border border-gray-200 shadow-sm">
           <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
           <button
             onClick={() => navigate("/verify")}
@@ -154,7 +178,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   }
 
   return (
-    <aside className="w-64 bg-gray-100 p-6 flex flex-col justify-between min-h-screen sticky top-0 font-['Space_Grotesk','Noto_Sans',sans-serif] text-gray-900">
+    <aside className="w-64 bg-[#19183B] text-white p-6 flex flex-col justify-between min-h-screen sticky top-0 font-['Space_Grotesk','Noto_Sans',sans-serif]">
       <div>
         {error && (
           <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-lg text-red-600 text-sm text-center">
@@ -165,15 +189,23 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           <SkeletonUserInfo />
         ) : (
           <div className="flex items-center gap-3 mb-8">
-            <img
-              alt="User avatar"
-              className="rounded-full size-12 object-cover"
-              src={userData.profilePicture}
-              onError={(e) => (e.target.src = "https://via.placeholder.com/48")}
-            />
+            {userData.profilePicture ? (
+              <img
+                alt="User avatar"
+                className="rounded-full w-12 h-12 object-cover"
+                src={userData.profilePicture}
+                onError={(e) => (e.target.src = "/images/placeholder.png")}
+              />
+            ) : (
+              <div className="rounded-full w-12 h-12 bg-gray-600 flex items-center justify-center">
+                <User className="w-6 h-6 text-white" />
+              </div>
+            )}
             <div>
-              <h1 className="font-bold text-lg">{userData.name}</h1>
-              <p className="text-sm text-gray-600">{userData.userType}</p>
+              <h1 className="font-bold text-lg">
+                {userData.firstName} {userData.lastName}
+              </h1>
+              <p className="text-sm text-gray-400">{userData.userType}</p>
               <p className="text-xs text-gray-500">
                 {userData.kycVerified ? "KYC Verified" : "Not KYC Verified"}
               </p>
@@ -182,36 +214,56 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         )}
         <nav className="flex flex-col gap-2">
           {navItems.map((item) => (
-            <button
+            <NavLink
               key={item.id}
+              to={item.path}
               onClick={() => setActiveTab(item.id)}
-              className={`flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 ${
-                activeTab === item.id
-                  ? "bg-[#19183B] text-white font-bold"
-                  : "hover:bg-gray-200 text-gray-600 hover:text-gray-900"
-              }`}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 ${
+                  isActive || activeTab === item.id
+                    ? "bg-white text-[#19183B] font-bold"
+                    : "text-gray-300 hover:bg-[#2A2A5A] hover:text-white"
+                }`
+              }
             >
               <item.icon className="w-5 h-5" />
               <span>{item.label}</span>
-            </button>
+            </NavLink>
           ))}
         </nav>
       </div>
       <div className="flex flex-col gap-2">
-        <button
-          className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300"
-          onClick={() => navigate("/profile")}
+        <NavLink
+          to="/profile"
+          onClick={() => setActiveTab("profile")}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 ${
+              isActive || activeTab === "profile"
+                ? "bg-white text-[#19183B] font-bold"
+                : "text-gray-300 hover:bg-[#2A2A5A] hover:text-white"
+            }`
+          }
         >
           <User className="w-5 h-5" />
           <span>Profile</span>
-        </button>
-        <button className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-gray-200 text-gray-600 hover:text-gray-900 transition-all duration-300">
+        </NavLink>
+        <NavLink
+          to="/settings"
+          onClick={() => setActiveTab("settings")}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2 rounded-full transition-all duration-300 ${
+              isActive || activeTab === "settings"
+                ? "bg-white text-[#19183B] font-bold"
+                : "text-gray-300 hover:bg-[#2A2A5A] hover:text-white"
+            }`
+          }
+        >
           <Settings className="w-5 h-5" />
           <span>Settings</span>
-        </button>
+        </NavLink>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2 rounded-full hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all duration-300"
+          className="flex items-center gap-3 px-4 py-2 rounded-full text-gray-300 hover:bg-red-600 hover:text-white transition-all duration-300"
         >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
