@@ -166,7 +166,10 @@ const Profile = () => {
         });
         setError("");
       } catch (err) {
-        console.error("Profile Fetch Error:", err.response?.data);
+        console.error(
+          "Profile Fetch Error:",
+          err.response?.data || err.message
+        );
         setError(
           err.response?.data?.error ||
             (err.response?.status === 401
@@ -213,12 +216,17 @@ const Profile = () => {
     const selectedFile = e.target.files[0];
     if (
       selectedFile &&
-      ["image/jpeg", "image/png", "image/jpg"].includes(selectedFile.type)
+      ["image/jpeg", "image/png", "image/jpg"].includes(selectedFile.type) &&
+      selectedFile.size <= 5 * 1024 * 1024 // 5MB limit
     ) {
       setFile(selectedFile);
       setError("");
     } else {
-      setError("Please select a valid image file (JPEG, JPG, or PNG)");
+      setError(
+        selectedFile
+          ? "Please select a valid image file (JPEG, JPG, or PNG) under 5MB"
+          : "No file selected"
+      );
       setFile(null);
     }
   };
@@ -249,7 +257,7 @@ const Profile = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            // Remove explicit Content-Type; axios sets it automatically for FormData
           },
         }
       );
@@ -261,13 +269,25 @@ const Profile = () => {
       setSuccess("Profile picture updated successfully");
       setFile(null);
     } catch (err) {
-      console.error("Profile Picture Upload Error:", err.response?.data);
+      console.error("Profile Picture Upload Error:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
       const errorMessage =
-        err.response?.status === 404
-          ? "Profile picture upload endpoint not found. Please check the server configuration."
+        err.response?.status === 401
+          ? "Authentication failed. Please log in again."
+          : err.response?.status === 403
+          ? "Please complete OTP verification"
+          : err.response?.status === 400
+          ? err.response?.data?.error || "Invalid file or request"
           : err.response?.data?.error || "Failed to upload profile picture";
       setError(errorMessage);
       setSuccess("");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        localStorage.removeItem("token");
+        navigate(err.response?.status === 401 ? "/login" : "/verify");
+      }
     } finally {
       setIsUploading(false);
     }
@@ -543,13 +563,37 @@ const Profile = () => {
                           <button
                             onClick={handleUploadProfilePicture}
                             disabled={isUploading}
-                            className={`w-full bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity ${
+                            className={`w-full bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity flex items-center justify-center gap-2 ${
                               isUploading ? "opacity-50 cursor-not-allowed" : ""
                             }`}
                           >
-                            {isUploading
-                              ? "Uploading..."
-                              : "Upload Profile Picture"}
+                            {isUploading ? (
+                              <>
+                                <svg
+                                  className="animate-spin h-5 w-5 text-white"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
+                                </svg>
+                                Uploading...
+                              </>
+                            ) : (
+                              "Upload Profile Picture"
+                            )}
                           </button>
                         )}
                       </div>
