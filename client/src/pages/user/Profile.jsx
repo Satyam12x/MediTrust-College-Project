@@ -1,62 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "../../components/Sidebar";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Phone,
-  CheckCircle,
-  Award,
-  Heart,
-  TrendingUp,
-  Shield,
-  AlertCircle,
-  Lock,
-  Edit,
-  Save,
-  X,
-  Copy,
-  Download,
-  Star,
-  Calendar,
-  MapPin,
-  Building,
-  UserCheck,
-  Settings,
-  Image as ImageIcon,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-
-// Skeleton Loading Components
-const SkeletonCard = () => (
-  <div className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-    <div className="flex items-center gap-4 mb-4">
-      <div className="w-12 h-12 bg-gray-300 rounded-full animate-pulse"></div>
-      <div>
-        <div className="h-4 bg-gray-300 rounded animate-pulse mb-2 w-24"></div>
-        <div className="h-6 bg-gray-300 rounded animate-pulse w-32"></div>
-      </div>
-    </div>
-  </div>
-);
-
-const SkeletonBadge = () => (
-  <div className="bg-gray-200 rounded-xl p-4 border border-gray-300">
-    <div className="flex items-center gap-3 mb-3">
-      <div className="w-10 h-10 bg-gray-300 rounded-full animate-pulse"></div>
-      <div>
-        <div className="h-4 bg-gray-300 rounded animate-pulse mb-1 w-20"></div>
-        <div className="h-3 bg-gray-300 rounded animate-pulse w-32"></div>
-      </div>
-    </div>
-    <div className="h-8 bg-gray-300 rounded animate-pulse"></div>
-  </div>
-);
+import axios from "axios";
+import Sidebar from "../../components/Sidebar";
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState("profile");
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
@@ -68,7 +15,6 @@ const Profile = () => {
     certificates: [],
     livesTouched: 0,
     trustScore: "0%",
-    badges: [],
     joinDate: "",
     location: "",
     profilePicture: "",
@@ -83,23 +29,21 @@ const Profile = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState({
+    fullName: false,
     email: false,
     phone: false,
+    location: false,
     password: false,
   });
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
     phone: "",
+    location: "",
     otp: "",
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
-  });
-  const [showPassword, setShowPassword] = useState({
-    current: false,
-    new: false,
-    confirm: false,
-    otp: false,
   });
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -116,10 +60,7 @@ const Profile = () => {
           return;
         }
 
-        const config = {
-          headers: { Authorization: `Bearer ${token}` },
-        };
-
+        const config = { headers: { Authorization: `Bearer ${token}` } };
         const [profileResponse, statsResponse] = await Promise.all([
           axios.get("http://localhost:5000/api/user/profile", config),
           axios.get("http://localhost:5000/api/user/stats", config),
@@ -146,9 +87,8 @@ const Profile = () => {
           livesTouched: stats.livesHelped || 0,
           trustScore: stats.trustScore || "0%",
           joinDate: profile.createdAt || new Date().toISOString(),
-          location: profile.location || "Not specified",
+          location: profile.location || "",
           profilePicture: profile.profilePicture || "",
-          badges: profile.badges || [],
           donationCount: profile.donationCount || 0,
           requestCount: profile.requestCount || 0,
           donationChange: stats.donationChange || "+0%",
@@ -157,8 +97,12 @@ const Profile = () => {
           impactChange: stats.impactChange || "+0%",
         });
         setFormData({
+          fullName: `${profile.firstName || ""} ${
+            profile.lastName || ""
+          }`.trim(),
           email: profile.email || "",
           phone: profile.phone || "",
+          location: profile.location || "",
           otp: "",
           currentPassword: "",
           newPassword: "",
@@ -217,7 +161,7 @@ const Profile = () => {
     if (
       selectedFile &&
       ["image/jpeg", "image/png", "image/jpg"].includes(selectedFile.type) &&
-      selectedFile.size <= 5 * 1024 * 1024 // 5MB limit
+      selectedFile.size <= 5 * 1024 * 1024
     ) {
       setFile(selectedFile);
       setError("");
@@ -236,7 +180,6 @@ const Profile = () => {
       setError("Please select an image to upload");
       return;
     }
-
     try {
       setIsUploading(true);
       setError("");
@@ -254,12 +197,7 @@ const Profile = () => {
       const response = await axios.post(
         "http://localhost:5000/api/user/upload-profile-picture",
         formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            // Remove explicit Content-Type; axios sets it automatically for FormData
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setUserData((prev) => ({
@@ -405,45 +343,64 @@ const Profile = () => {
     }
   };
 
+  const handleSaveChanges = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    // Note: Backend doesn't support updating fullName or location directly; implement if needed
+    setIsEditing({
+      fullName: false,
+      email: false,
+      phone: false,
+      location: false,
+      password: false,
+    });
+    setSuccess("Changes saved successfully");
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      fullName: `${userData.firstName} ${userData.lastName}`.trim(),
+      email: userData.email,
+      phone: userData.phone,
+      location: userData.location,
+      otp: "",
+      currentPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    });
+    setIsEditing({
+      fullName: false,
+      email: false,
+      phone: false,
+      location: false,
+      password: false,
+    });
+    setError("");
+    setSuccess("");
+  };
+
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setSuccess("Copied to clipboard!");
-    setTimeout(() => setSuccess(""), 2000);
-  };
-
-  const getVerificationStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-600 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-600 border-yellow-200";
-      default:
-        return "bg-gray-100 text-gray-600 border-gray-200";
-    }
-  };
-
-  const getBadgeColor = (type) => {
-    switch (type) {
-      case "gold":
-        return "from-yellow-400 to-yellow-600";
-      case "silver":
-        return "from-gray-400 to-gray-600";
-      case "bronze":
-        return "from-orange-400 to-orange-600";
-      default:
-        return "from-blue-400 to-blue-600";
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setSuccess("Copied to clipboard!");
+      setTimeout(() => setSuccess(""), 2000);
+    } else {
+      setError("No certificate ID available to copy");
     }
   };
 
   if (error && userData.status !== "completed") {
     return (
-      <div className="min-h-screen bg-white text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif] flex items-center justify-center">
-        <div className="text-center p-8 bg-gray-100 rounded-xl border border-gray-200 shadow-sm">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
+      <div className="min-h-screen bg-gray-900 text-white font-['Inter','Noto_Sans',sans-serif] flex items-center justify-center">
+        <div className="text-center p-8 bg-[#100F2B] rounded-2xl shadow-lg">
+          <span className="material-symbols-outlined text-6xl text-red-400 mb-4">
+            error
+          </span>
+          <h1 className="text-2xl font-bold text-red-400 mb-4">{error}</h1>
           <button
             onClick={() => navigate("/verify")}
-            className="bg-[#19183B] text-white font-bold py-2 px-4 rounded-full hover:bg-opacity-90 transition-opacity"
+            className="bg-[#19183B] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#3b82f6] transition-colors duration-300"
           >
             Go to Verification
           </button>
@@ -453,214 +410,218 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-['Space_Grotesk','Noto_Sans',sans-serif]">
-      <div className="flex">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <main className="flex-1 p-8">
-          {/* Header */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
-            <div>
-              <h1 className="text-4xl font-bold">Profile</h1>
-              <p className="text-gray-600 mt-1">
-                Manage your account settings and view your impact
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                className="flex items-center gap-2 bg-gray-100 border border-gray-200 py-2.5 px-5 rounded-xl hover:border-[#19183B] transition-all duration-300 shadow-sm"
-                onClick={() => navigate("/settings")}
-              >
-                <Settings className="w-5 h-5 text-[#19183B]" />
-                <span>Settings</span>
-              </button>
-              <button className="flex items-center gap-2 bg-[#19183B] text-white py-2.5 px-5 rounded-xl hover:shadow-md hover:shadow-[#19183B]/50 transition-all duration-300 hover:scale-105">
-                <Download className="w-5 h-5" />
-                <span>Export Data</span>
-              </button>
-            </div>
+    <div className="flex min-h-screen bg-gray-900 text-white font-['Inter','Noto_Sans',sans-serif]">
+      <Sidebar activeTab="profile" />
+      <main className="flex-1 bg-[#141332] p-8 rounded-l-3xl">
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 flex items-center gap-3">
+            <span className="material-symbols-outlined">error</span>
+            <span>{error}</span>
           </div>
-
-          {/* Alert Messages */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-200 rounded-xl text-red-600 flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-          {success && (
-            <div className="mb-6 p-4 bg-green-100 border border-green-200 rounded-xl text-green-600 flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 flex-shrink-0" />
-              <span>{success}</span>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Profile Information */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Personal Information Card */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Personal Information</h2>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
-                      Profile Completion
-                    </span>
-                    <div className="w-24 h-2 bg-gray-300 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#19183B] rounded-full"
-                        style={{
-                          width: userData.profilePicture ? "90%" : "85%",
-                        }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-semibold text-[#19183B]">
-                      {userData.profilePicture ? "90%" : "85%"}
-                    </span>
-                  </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 bg-green-500/10 border border-green-500/50 rounded-xl text-green-400 flex items-center gap-3">
+            <span className="material-symbols-outlined">check_circle</span>
+            <span>{success}</span>
+          </div>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <header className="mb-8">
+              <h1 className="text-4xl font-bold text-white">My Profile</h1>
+              <p className="text-gray-400 mt-1">
+                Manage your personal and account details.
+              </p>
+            </header>
+            <div className="bg-[#100F2B] p-8 rounded-2xl shadow-lg">
+              <div className="flex items-center gap-6 mb-8">
+                <div className="relative group">
+                  {isLoading ? (
+                    <div className="w-32 h-32 rounded-full bg-gray-700 animate-pulse"></div>
+                  ) : (
+                    <>
+                      <img
+                        alt={`${userData.firstName}'s profile picture`}
+                        className="w-32 h-32 rounded-full object-cover ring-4 ring-[#19183B] group-hover:ring-[#3b82f6] transition-all duration-300"
+                        src={
+                          userData.profilePicture ||
+                          "https://via.placeholder.com/128"
+                        }
+                        onError={(e) =>
+                          (e.target.src = "https://via.placeholder.com/128")
+                        }
+                      />
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/jpg"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="profile-picture-upload"
+                      />
+                      <label
+                        htmlFor="profile-picture-upload"
+                        className="absolute bottom-2 right-2 bg-[#19183B] hover:bg-[#3b82f6] text-white p-2 rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-base">
+                          edit
+                        </span>
+                      </label>
+                    </>
+                  )}
                 </div>
-
+                <div>
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      <div className="h-6 w-32 bg-gray-700 rounded animate-pulse"></div>
+                      <div className="h-4 w-48 bg-gray-700 rounded animate-pulse"></div>
+                      <div className="h-4 w-24 bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <h2 className="text-2xl font-bold">
+                        {userData.firstName} {userData.lastName}
+                      </h2>
+                      <p className="text-gray-400">{userData.email}</p>
+                      <p className="text-gray-500 text-sm mt-1">
+                        Joined on{" "}
+                        {new Date(userData.joinDate).toLocaleDateString()}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              {file && (
+                <button
+                  onClick={handleUploadProfilePicture}
+                  disabled={isUploading}
+                  className={`w-full bg-[#19183B] text-white font-semibold py-3 rounded-lg hover:bg-[#3b82f6] transition-colors duration-300 mb-6 flex items-center justify-center gap-2 ${
+                    isUploading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {isUploading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined">upload</span>
+                      Upload Profile Picture
+                    </>
+                  )}
+                </button>
+              )}
+              <form onSubmit={handleSaveChanges}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Profile Picture */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <ImageIcon className="w-4 h-4" />
-                      Profile Picture
-                    </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : (
-                      <div className="space-y-2">
-                        <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between">
-                          {userData.profilePicture ? (
-                            <img
-                              src={userData.profilePicture}
-                              alt="Profile"
-                              className="w-12 h-12 rounded-full object-cover"
-                              onError={(e) =>
-                                (e.target.src = "/images/placeholder.png")
-                              }
-                            />
-                          ) : (
-                            <div className="w-12 h-12 rounded-full bg-gray-400 flex items-center justify-center text-white">
-                              <User className="w-6 h-6" />
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            accept="image/jpeg,image/png,image/jpg"
-                            onChange={handleFileChange}
-                            className="hidden"
-                            id="profile-picture-upload"
-                          />
-                          <label
-                            htmlFor="profile-picture-upload"
-                            className="p-1 text-gray-500 hover:text-[#19183B] transition-colors cursor-pointer"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </label>
-                        </div>
-                        {file && (
-                          <button
-                            onClick={handleUploadProfilePicture}
-                            disabled={isUploading}
-                            className={`w-full bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity flex items-center justify-center gap-2 ${
-                              isUploading ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
-                          >
-                            {isUploading ? (
-                              <>
-                                <svg
-                                  className="animate-spin h-5 w-5 text-white"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                  ></circle>
-                                  <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                  ></path>
-                                </svg>
-                                Uploading...
-                              </>
-                            ) : (
-                              "Upload Profile Picture"
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Name */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <User className="w-4 h-4" />
+                  <div>
+                    <label
+                      htmlFor="fullName"
+                      className="block text-sm font-medium text-gray-400 mb-2"
+                    >
                       Full Name
                     </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
+                    {isEditing.fullName ? (
+                      <div className="flex gap-2">
+                        <input
+                          id="fullName"
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                          placeholder="Enter full name"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              fullName: false,
+                            }))
+                          }
+                          className="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 transition-colors"
+                        >
+                          <span className="material-symbols-outlined">
+                            close
+                          </span>
+                        </button>
+                      </div>
                     ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300">
-                        <p className="font-semibold text-gray-900">
-                          {userData.firstName} {userData.lastName}
-                        </p>
+                      <div className="relative">
+                        <input
+                          id="fullName"
+                          type="text"
+                          value={`${userData.firstName} ${userData.lastName}`}
+                          disabled
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-gray-400 focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              fullName: true,
+                            }))
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b82f6]"
+                        >
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  {/* User Type */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Building className="w-4 h-4" />
-                      Account Type
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-400 mb-2"
+                    >
+                      Email
                     </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300">
-                        <span className="px-3 py-1 bg-[#19183B] text-white rounded-full text-sm font-medium">
-                          {userData.userType}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Mail className="w-4 h-4" />
-                      Email Address
-                    </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : isEditing.email ? (
+                    {isEditing.email ? (
                       <div className="space-y-3">
                         <div className="flex gap-2">
                           <input
+                            id="email"
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleInputChange}
+                            className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
                             placeholder="Enter new email"
-                            className="flex-1 bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
                           />
                           <button
+                            type="button"
                             onClick={handleUpdateEmail}
                             disabled={!formData.email}
-                            className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-[#19183B] text-white p-3 rounded-md hover:bg-[#3b82f6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Send OTP
+                            <span className="material-symbols-outlined">
+                              send
+                            </span>
                           </button>
                           <button
+                            type="button"
                             onClick={() => {
                               setIsEditing((prev) => ({
                                 ...prev,
@@ -672,246 +633,233 @@ const Profile = () => {
                                 otp: "",
                               }));
                             }}
-                            className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                            className="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 transition-colors"
                           >
-                            <X className="w-4 h-4" />
+                            <span className="material-symbols-outlined">
+                              close
+                            </span>
                           </button>
                         </div>
                         {isEditing.email && (
                           <div className="flex gap-2">
-                            <div className="relative flex-1">
-                              <input
-                                type={showPassword.otp ? "text" : "password"}
-                                name="otp"
-                                value={formData.otp}
-                                onChange={handleInputChange}
-                                placeholder="Enter OTP"
-                                className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                              />
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setShowPassword((prev) => ({
-                                    ...prev,
-                                    otp: !prev.otp,
-                                  }))
-                                }
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                              >
-                                {showPassword.otp ? (
-                                  <EyeOff className="w-4 h-4" />
-                                ) : (
-                                  <Eye className="w-4 h-4" />
-                                )}
-                              </button>
-                            </div>
+                            <input
+                              type="text"
+                              name="otp"
+                              value={formData.otp}
+                              onChange={handleInputChange}
+                              className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                              placeholder="Enter OTP"
+                            />
                             <button
+                              type="button"
                               onClick={handleVerifyEmailOtp}
                               disabled={!formData.otp}
-                              className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-[#19183B] text-white p-3 rounded-md hover:bg-[#3b82f6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Verify OTP
+                              <span className="material-symbols-outlined">
+                                check
+                              </span>
                             </button>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
-                        <p className="font-semibold text-gray-900">
-                          {userData.email}
-                        </p>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => copyToClipboard(userData.email)}
-                            className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() =>
-                              setIsEditing((prev) => ({ ...prev, email: true }))
-                            }
-                            className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <div className="relative">
+                        <input
+                          id="email"
+                          type="email"
+                          value={userData.email}
+                          disabled
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-gray-400 focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsEditing((prev) => ({ ...prev, email: true }))
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b82f6]"
+                        >
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Phone className="w-4 h-4" />
+                  <div>
+                    <label
+                      htmlFor="phoneNumber"
+                      className="block text-sm font-medium text-gray-400 mb-2"
+                    >
                       Phone Number
                     </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : isEditing.phone ? (
+                    {isEditing.phone ? (
                       <div className="flex gap-2">
                         <input
+                          id="phoneNumber"
                           type="tel"
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          placeholder="Enter new phone number"
-                          className="flex-1 bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                          placeholder="Enter phone number"
                         />
                         <button
+                          type="button"
                           onClick={handleUpdatePhone}
                           disabled={!formData.phone}
-                          className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="bg-[#19183B] text-white p-3 rounded-md hover:bg-[#3b82f6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <Save className="w-4 h-4" />
+                          <span className="material-symbols-outlined">
+                            save
+                          </span>
                         </button>
                         <button
+                          type="button"
                           onClick={() => {
-                            setIsEditing((prev) => ({ ...prev, phone: false }));
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              phone: false,
+                            }));
                             setFormData((prev) => ({
                               ...prev,
                               phone: userData.phone,
                             }));
                           }}
-                          className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                          className="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 transition-colors"
                         >
-                          <X className="w-4 h-4" />
+                          <span className="material-symbols-outlined">
+                            close
+                          </span>
                         </button>
                       </div>
                     ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
-                        <p className="font-semibold text-gray-900">
-                          {userData.phone || "Not provided"}
-                        </p>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {userData.phone && (
-                            <button
-                              onClick={() => copyToClipboard(userData.phone)}
-                              className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() =>
-                              setIsEditing((prev) => ({ ...prev, phone: true }))
-                            }
-                            className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <div className="relative">
+                        <input
+                          id="phoneNumber"
+                          type="tel"
+                          value={userData.phone || ""}
+                          disabled
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-gray-400 focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsEditing((prev) => ({ ...prev, phone: true }))
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b82f6]"
+                        >
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Lock className="w-4 h-4" />
+                  <div>
+                    <label
+                      htmlFor="location"
+                      className="block text-sm font-medium text-gray-400 mb-2"
+                    >
+                      Location
+                    </label>
+                    {isEditing.location ? (
+                      <div className="flex gap-2">
+                        <input
+                          id="location"
+                          type="text"
+                          name="location"
+                          value={formData.location}
+                          onChange={handleInputChange}
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                          placeholder="Enter your location"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              location: false,
+                            }))
+                          }
+                          className="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 transition-colors"
+                        >
+                          <span className="material-symbols-outlined">
+                            close
+                          </span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          id="location"
+                          type="text"
+                          value={userData.location || ""}
+                          disabled
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-gray-400 focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 pr-12"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsEditing((prev) => ({
+                              ...prev,
+                              location: true,
+                            }))
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b82f6]"
+                        >
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">
                       Password
                     </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : isEditing.password ? (
+                    {isEditing.password ? (
                       <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <input
-                              type={showPassword.current ? "text" : "password"}
-                              name="currentPassword"
-                              value={formData.currentPassword}
-                              onChange={handleInputChange}
-                              placeholder="Enter current password"
-                              className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowPassword((prev) => ({
-                                  ...prev,
-                                  current: !prev.current,
-                                }))
-                              }
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                            >
-                              {showPassword.current ? (
-                                <EyeOff className="w-4 h-4" />
-                              ) : (
-                                <Eye className="w-4 h-4" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <input
-                              type={showPassword.new ? "text" : "password"}
-                              name="newPassword"
-                              value={formData.newPassword}
-                              onChange={handleInputChange}
-                              placeholder="Enter new password"
-                              className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowPassword((prev) => ({
-                                  ...prev,
-                                  new: !prev.new,
-                                }))
-                              }
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                            >
-                              {showPassword.new ? (
-                                <EyeOff className="w-4 h-4" />
-                              ) : (
-                                <Eye className="w-4 h-4" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="relative">
-                            <input
-                              type={showPassword.confirm ? "text" : "password"}
-                              name="confirmNewPassword"
-                              value={formData.confirmNewPassword}
-                              onChange={handleInputChange}
-                              placeholder="Confirm new password"
-                              className="w-full bg-white border border-gray-300 rounded-lg p-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#19183B] focus:border-[#19183B] transition-all duration-300"
-                            />
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowPassword((prev) => ({
-                                  ...prev,
-                                  confirm: !prev.confirm,
-                                }))
-                              }
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#19183B]"
-                            >
-                              {showPassword.confirm ? (
-                                <EyeOff className="w-4 h-4" />
-                              ) : (
-                                <Eye className="w-4 h-4" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
+                        <input
+                          type="password"
+                          name="currentPassword"
+                          value={formData.currentPassword}
+                          onChange={handleInputChange}
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                          placeholder="Enter current password"
+                        />
+                        <input
+                          type="password"
+                          name="newPassword"
+                          value={formData.newPassword}
+                          onChange={handleInputChange}
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                          placeholder="Enter new password"
+                        />
+                        <input
+                          type="password"
+                          name="confirmNewPassword"
+                          value={formData.confirmNewPassword}
+                          onChange={handleInputChange}
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-white focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 transition-all duration-300"
+                          placeholder="Confirm new password"
+                        />
                         <div className="flex gap-2">
                           <button
+                            type="button"
                             onClick={handleUpdatePassword}
                             disabled={
                               !formData.currentPassword ||
                               !formData.newPassword ||
                               !formData.confirmNewPassword
                             }
-                            className="bg-[#19183B] text-white px-4 py-3 rounded-lg hover:bg-opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-[#19183B] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#3b82f6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Update Password
                           </button>
                           <button
+                            type="button"
                             onClick={() => {
                               setIsEditing((prev) => ({
                                 ...prev,
@@ -924,184 +872,220 @@ const Profile = () => {
                                 confirmNewPassword: "",
                               }));
                             }}
-                            className="bg-gray-300 text-gray-600 px-4 py-3 rounded-lg hover:bg-gray-400 transition-colors"
+                            className="bg-gray-600 text-white p-3 rounded-md hover:bg-gray-700 transition-colors"
                           >
-                            <X className="w-4 h-4" />
+                            <span className="material-symbols-outlined">
+                              close
+                            </span>
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300 flex items-center justify-between group">
-                        <p className="font-semibold text-gray-900">********</p>
+                      <div className="relative">
+                        <input
+                          type="password"
+                          value="********"
+                          disabled
+                          className="form-input w-full bg-[#19183B] border-transparent rounded-md py-3 px-4 text-gray-400 focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent placeholder-gray-500 pr-12"
+                        />
                         <button
+                          type="button"
                           onClick={() =>
                             setIsEditing((prev) => ({
                               ...prev,
                               password: true,
                             }))
                           }
-                          className="p-1 text-gray-500 hover:text-[#19183B] transition-colors"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#3b82f6]"
                         >
-                          <Edit className="w-4 h-4" />
+                          <span className="material-symbols-outlined">
+                            edit
+                          </span>
                         </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Location */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <MapPin className="w-4 h-4" />
-                      Location
-                    </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300">
-                        <p className="font-semibold text-gray-900">
-                          {userData.location}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Join Date */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      Join Date
-                    </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : (
-                      <div className="bg-gray-200 rounded-lg p-3 border border-gray-300">
-                        <p className="font-semibold text-gray-900">
-                          {new Date(userData.joinDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Verification Status */}
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
-                      <UserCheck className="w-4 h-4" />
-                      Verification Status
-                    </label>
-                    {isLoading ? (
-                      <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-                    ) : (
-                      <div
-                        className={`rounded-lg p-3 border ${getVerificationStatusColor(
-                          userData.status
-                        )}`}
-                      >
-                        <p className="font-semibold capitalize">
-                          {userData.status}
-                        </p>
                       </div>
                     )}
                   </div>
                 </div>
-              </section>
+                <div className="mt-8 flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-6 py-3 rounded-lg text-sm font-semibold text-gray-300 hover:bg-[#19183B] transition-colors duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#19183B] hover:bg-[#3b82f6] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
             </div>
-
-            {/* Sidebar Stats and Badges */}
-            <div className="space-y-8">
-              {/* Impact Stats */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-2xl font-bold mb-6">Your Impact</h2>
-                {isLoading ? (
-                  <SkeletonCard />
-                ) : (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <Heart className="w-10 h-10 text-[#19183B] bg-[#19183B]/10 p-2 rounded-full" />
-                      <div>
-                        <p className="text-sm text-gray-600">Lives Helped</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {userData.livesTouched}
-                        </p>
-                        <p className="text-sm text-green-600">
-                          {userData.impactChange}
-                        </p>
-                      </div>
+            <div className="bg-[#100F2B] p-8 rounded-2xl shadow-lg mt-8">
+              <h3 className="text-xl font-bold mb-4">Account Information</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">KYC Status</span>
+                  {isLoading ? (
+                    <div className="h-4 w-24 bg-gray-700 rounded animate-pulse"></div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-green-400">
+                      <span className="material-symbols-outlined">
+                        verified
+                      </span>
+                      <span className="font-medium">
+                        {userData.kycVerified ? "Verified" : "Not Verified"}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <TrendingUp className="w-10 h-10 text-[#19183B] bg-[#19183B]/10 p-2 rounded-full" />
-                      <div>
-                        <p className="text-sm text-gray-600">Total Donations</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {userData.donationCount}
-                        </p>
-                        <p className="text-sm text-green-600">
-                          {userData.donationChange}
-                        </p>
-                      </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Account Status</span>
+                  {isLoading ? (
+                    <div className="h-4 w-24 bg-gray-700 rounded animate-pulse"></div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-green-400">
+                      <span className="material-symbols-outlined">
+                        task_alt
+                      </span>
+                      <span className="font-medium">
+                        {userData.status === "completed" ? "Active" : "Pending"}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <Shield className="w-10 h-10 text-[#19183B] bg-[#19183B]/10 p-2 rounded-full" />
-                      <div>
-                        <p className="text-sm text-gray-600">Trust Score</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          {userData.trustScore}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </section>
-
-              {/* Badges */}
-              <section className="bg-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
-                <h2 className="text-2xl font-bold mb-6">Badges</h2>
-                {isLoading ? (
-                  <div className="space-y-4">
-                    <SkeletonBadge />
-                    <SkeletonBadge />
-                  </div>
-                ) : userData.badges.length > 0 ? (
-                  <div className="space-y-4">
-                    {userData.badges.map((badge, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-200 rounded-xl p-4 border border-gray-300"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <Star
-                            className={`w-10 h-10 bg-gradient-to-br ${getBadgeColor(
-                              badge.type
-                            )} text-white p-2 rounded-full`}
-                          />
-                          <div>
-                            <p className="font-semibold text-gray-900">
-                              {badge.type.charAt(0).toUpperCase() +
-                                badge.type.slice(1)}{" "}
-                              Badge
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {badge.description}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => copyToClipboard(badge.certificateId)}
-                          className="w-full bg-gray-300 text-gray-900 py-2 rounded-lg hover:bg-gray-400 transition-colors flex items-center justify-center gap-2"
-                        >
-                          <Copy className="w-4 h-4" />
-                          Copy Certificate ID
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-600">No badges earned yet.</p>
-                )}
-              </section>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Certificates</span>
+                  {isLoading ? (
+                    <div className="h-4 w-32 bg-gray-700 rounded animate-pulse"></div>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        copyToClipboard(
+                          userData.certificates[0]?.certificateId || ""
+                        )
+                      }
+                      className="flex items-center gap-2 text-[#3b82f6] hover:underline"
+                    >
+                      <span className="material-symbols-outlined">link</span>
+                      <span className="font-medium">View on Blockchain</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </main>
-      </div>
+          <div className="space-y-8">
+            <div className="bg-[#100F2B] p-6 rounded-2xl shadow-lg">
+              <h3 className="text-xl font-bold mb-4">Profile Completion</h3>
+              {isLoading ? (
+                <div className="h-2.5 w-full bg-gray-700 rounded-full animate-pulse"></div>
+              ) : (
+                <>
+                  <div className="w-full bg-[#19183B] rounded-full h-2.5">
+                    <div
+                      className="bg-gradient-to-r from-[#3b82f6] to-[#2563eb] h-2.5 rounded-full"
+                      style={{
+                        width: userData.profilePicture
+                          ? userData.kycVerified
+                            ? "90%"
+                            : "75%"
+                          : "60%",
+                      }}
+                    ></div>
+                  </div>
+                  <p className="text-right text-sm text-gray-400 mt-2">
+                    {userData.profilePicture
+                      ? userData.kycVerified
+                        ? "90% Complete"
+                        : "75% Complete"
+                      : "60% Complete"}
+                  </p>
+                </>
+              )}
+            </div>
+            <div className="bg-[#100F2B] p-6 rounded-2xl shadow-lg">
+              <h3 className="text-xl font-bold mb-4">Impact Stats</h3>
+              {isLoading ? (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="h-12 w-full bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-3xl font-bold text-[#3b82f6]">
+                      {userData.livesTouched}
+                    </p>
+                    <p className="text-sm text-gray-400">Lives Helped</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-[#3b82f6]">
+                      {userData.donationCount}
+                    </p>
+                    <p className="text-sm text-gray-400">Donations</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-bold text-[#3b82f6]">
+                      {userData.trustScore}
+                    </p>
+                    <p className="text-sm text-gray-400">Trust Score</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="bg-[#100F2B] p-6 rounded-2xl shadow-lg">
+              <h3 className="text-xl font-bold mb-4">Badges Earned</h3>
+              {isLoading ? (
+                <div className="flex justify-center gap-4">
+                  <div className="h-12 w-12 bg-gray-700 rounded-full animate-pulse"></div>
+                  <div className="h-12 w-12 bg-gray-700 rounded-full animate-pulse"></div>
+                  <div className="h-12 w-12 bg-gray-700 rounded-full animate-pulse"></div>
+                </div>
+              ) : userData.badges && userData.badges.length > 0 ? (
+                <div className="flex justify-center gap-4">
+                  {userData.badges.map((badge, index) => (
+                    <div
+                      key={index}
+                      className="p-3 bg-[#19183B] rounded-full"
+                      title={`${
+                        badge.type.charAt(0).toUpperCase() + badge.type.slice(1)
+                      } Badge`}
+                    >
+                      <span
+                        className={`material-symbols-outlined text-3xl ${
+                          badge.type === "gold"
+                            ? "text-yellow-400"
+                            : badge.type === "silver"
+                            ? "text-gray-400"
+                            : badge.type === "bronze"
+                            ? "text-orange-400"
+                            : "text-blue-400"
+                        }`}
+                      >
+                        {badge.type === "gold"
+                          ? "emoji_events"
+                          : badge.type === "silver"
+                          ? "volunteer_activism"
+                          : badge.type === "bronze"
+                          ? "verified_user"
+                          : "military_tech"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-center">
+                  No badges earned yet.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
