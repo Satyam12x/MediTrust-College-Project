@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 
+console.log("sunil is doing coding!!")
+
 const Footer = () => {
   return (
     <footer className="bg-slate-800 text-white py-16">
