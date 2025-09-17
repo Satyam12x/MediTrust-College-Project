@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Footer from "../components/Footer";
 
+console.log("Sunil is COding!!"):
+
 // Enhanced Navbar with hover effects
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
